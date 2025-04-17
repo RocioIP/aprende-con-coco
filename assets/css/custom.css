@@ -1,0 +1,18 @@
+html,
+body {
+  font-family: "Fredoka", sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+h1,
+.btn {
+  border-radius: 2rem;
+}
+
+.btn-warning {
+  background-color: #ffd966;
+  border: none;
+  color: #333;
+}
