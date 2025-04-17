@@ -4,7 +4,6 @@ export default defineNuxtConfig({
     '@/assets/css/custom.css'
   ],
   modules: ['@nuxtjs/google-fonts'],
-
   googleFonts: {
     families: {
       Fredoka: [400, 500, 700],
