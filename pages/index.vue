@@ -8,21 +8,27 @@
       </div>
     </div>
 
-    <!-- Imagen de Coco -->
+    <!-- Imagen de Coco (¡ahora también habla!) -->
     <div class="mb-4">
-      <img src="/imagenes/coco-saludando.webp" alt="Coco saludando" class="img-fluid" style="width: 15rem; height: auto;" />
+      <img 
+        src="/images/global/coco-saludando.webp" 
+        alt="Coco saludando" 
+        class="img-fluid"
+        style="width: 15rem; height: auto; cursor: pointer;" 
+        @click="repeatSpeech"
+      />
     </div>
 
     <!-- Botones grandes debajo de Coco -->
     <div class="d-flex gap-5">
-      <NuxtLink to="/juegos" @click="playAudio" class="btn btn-warning btn-lg rounded-pill shadow-sm pulse-button">
-        🎮 Juegos
+      <NuxtLink to="/juegos" @click="stopSpeaking" class="btn btn-warning btn-lg rounded-pill shadow-sm pulse-button">
+        🎈 Jogos
       </NuxtLink>
-      <NuxtLink to="/cuentos" class="btn btn-primary btn-lg rounded-pill shadow-sm pulse-button">
-        📖 Cuentos
+      <NuxtLink to="/cuentos" @click="stopSpeaking" class="btn btn-primary btn-lg rounded-pill shadow-sm pulse-button">
+        📖 Histórias
       </NuxtLink>
-      <NuxtLink to="/pizarra" class="btn btn-danger btn-lg rounded-pill shadow-sm pulse-button">
-        🎨 Pizarra
+      <NuxtLink to="/pizarra" @click="stopSpeaking" class="btn btn-danger btn-lg rounded-pill shadow-sm pulse-button">
+        🎨 Quadro-negro
       </NuxtLink>
     </div>
 
@@ -32,26 +38,40 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const fullText = "Hola Eduardo, qué quieres hacer hoy?";
+const fullText = "Olá eduardo, eu sou o coco! o que queres fazer hoje?";
 const displayedText = ref('');
-let audio;
 
 onMounted(() => {
-  audio = new Audio('/imagenes/saludo-coco.mp3'); // Asegúrate que esté fuera de /public en la carpeta correcta
-  typeText();
+  typeTextAndSpeak();
 });
 
-function typeText() {
+function typeTextAndSpeak() {
   let index = 0;
+  displayedText.value = '';
   const interval = setInterval(() => {
     displayedText.value += fullText[index];
     index++;
     if (index === fullText.length) clearInterval(interval);
   }, 100);
+
+  speakText();
 }
 
-function playAudio() {
-  audio.play();
+function speakText() {
+  const utterance = new SpeechSynthesisUtterance(fullText);
+  utterance.lang = "pt-PT"; // Cambia a "pt-BR" si prefieres portugués brasileño
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+}
+
+// Repetir la frase al tocar a Coco
+function repeatSpeech() {
+  speakText();
+}
+
+// Detener voz si el niño cambia de sección
+function stopSpeaking() {
+  speechSynthesis.cancel();
 }
 </script>
 

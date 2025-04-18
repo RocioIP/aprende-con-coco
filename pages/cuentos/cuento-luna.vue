@@ -41,7 +41,7 @@
   const pages = [
   {
     title: "Capítulo 1: Un deseo bajo las estrellas",
-    image: "/imagenes/cuentos/luna/cap-1.png",
+    image: "/images/stories/luna/cap-1.png",
     text: `Esa noche, Coco miraba el cielo desde su camita.
 
 —¡Qué bonita es la luna! —suspiró.
@@ -51,7 +51,7 @@ Sin saber cómo, empezó a soñar… y ¡su cama se convirtió en una nave espac
   },
   {
     title: "Capítulo 2: Traje de astronauta",
-    image: "/imagenes/cuentos/luna/cap-2.png",
+    image: "/images/stories/luna/cap-2.png",
     text: `Dentro del sueño, Coco se encontró frente a un espejo con un traje espacial: casco, botas grandes y un botón que decía “¡Despegar!”.
 
 —¡Estoy listo para mi aventura lunar! —dijo dando saltitos.
@@ -60,14 +60,14 @@ Tocó el botón… y su nave comenzó a rugir.`,
   },
   {
     title: "Capítulo 3: Vuelo entre estrellas",
-    image: "/imagenes/cuentos/luna/cap-3.png",
+    image: "/images/stories/luna/cap-3.png",
     text: `La nave voló suave entre las estrellas. Coco saludaba a cometas, hacía carreras con meteoritos y hasta chocó su pata con un satélite amistoso.
 
 —¡Esto es más bonito de lo que imaginaba! —ladró feliz.`,
   },
   {
     title: "Capítulo 4: Patas en la Luna",
-    image: "/imagenes/cuentos/luna/cap-4.png",
+    image: "/images/stories/luna/cap-4.png",
     text: `Al llegar, Coco saltó y rebotó en la luna como un muelle.
 
 —¡Estoy flotando! ¡Qué divertido!
@@ -78,7 +78,7 @@ Allí conoció a una estrella tímida que le dijo:
   },
   {
     title: "Capítulo 5: El mejor despertar",
-    image: "/imagenes/cuentos/luna/cap-5.png",
+    image: "/images/stories/luna/cap-5.png",
     text: `Coco despertó con la nariz en su almohada y una sonrisa enorme.
 
 Miró al cielo desde su ventana.

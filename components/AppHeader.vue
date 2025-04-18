@@ -2,7 +2,7 @@
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-0">
       <NuxtLink class="navbar-brand" to="/">
-        <img src="/public/imagenes/aprende-con-coco.png" alt="" class="img-logo">
+        <img src="/public/images/global/logo.png" alt="Logo aprende con Coco" class="img-logo">
       </NuxtLink>
 
       <button
@@ -23,13 +23,13 @@
       >
         <ul class="navbar-nav">
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/juegos">🎮 Juegos</NuxtLink>
+            <NuxtLink class="nav-link" to="/juegos">🎈 Jogos</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/cuentos">📖 Cuentos</NuxtLink>
+            <NuxtLink class="nav-link" to="/cuentos">📖 Histórias</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/pizarra">🎨 Pizarra</NuxtLink>
+            <NuxtLink class="nav-link" to="/pizarra">🎨 Quadro-negro</NuxtLink>
           </li>
           <!-- <li class="nav-item">
             <NuxtLink class="nav-link" to="/analitica">📊 Analítica</NuxtLink>

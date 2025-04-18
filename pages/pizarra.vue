@@ -2,7 +2,7 @@
   <div class="pizarra-layout">
     <!-- Mascota (izquierda) -->
     <div class="mascota-area">
-      <img src="/imagenes/pintor.png" alt="Mascota" class="mascota-img" />
+      <img src="/images/blackboard/painter.png" alt="Mascota" class="mascota-img" />
     </div>
 
     <!-- Área de la pizarra (centro) -->

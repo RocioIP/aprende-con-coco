@@ -4,15 +4,15 @@
       <!-- <h1 class="titulo">Elige un cuento</h1> -->
       <div class="lista-cuentos">
         <div class="cuadro-cuento" @click="abrirCuento('cuento1')">
-          <img src="/imagenes/cuentos/barco/portada.png" alt="Cuento Barco" />
+          <img src="/images/stories/barco/portada.png" alt="Cuento Barco" />
           <h2>El Barco encantado</h2>
         </div>
         <div class="cuadro-cuento" @click="abrirCuento('cuento2')">
-          <img src="/imagenes/cuentos/luna/portada.png" alt="Cuento Luna" />
+          <img src="/images/stories/luna/portada.png" alt="Cuento Luna" />
           <h2>Coco y su viaje a la Luna</h2>
         </div>
         <!-- <div class="cuadro-cuento" @click="abrirCuento('cuento3')">
-          <img src="/imagenes/cuentos/deportes/portada.png" alt="Cuento Luna" />
+          <img src="/images/stories/deportes/portada.png" alt="Cuento Luna" />
           <h2>Coco se pone en forma</h2>
         </div> -->
         <!-- Agregás más cuentos aquí si querés -->

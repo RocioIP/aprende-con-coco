@@ -41,7 +41,7 @@
   const pages = [
   {
     title: "Capítulo 1: Goles con rugido",
-    image: "/imagenes/cuentos/deportes/cap-1.png",
+    image: "/images/stories/deportes/cap-1.png",
     text: `Coco estaba triste porque no alcanzaba la pelota.
 —¡No importa el tamaño, sino la garra! —rugió el león.
 Con ánimo y práctica, Coco logró marcar un gol con la cola.
@@ -49,7 +49,7 @@ Con ánimo y práctica, Coco logró marcar un gol con la cola.
   },
   {
     title: "Capítulo 2: Coco y el salto ardilla",
-    image: "/imagenes/cuentos/deportes/cap-2.png",
+    image: "/images/stories/deportes/cap-2.png",
     text: `La ardilla botaba el balón a toda velocidad.
 —¡Vamos, Coco! ¡Salta como yo!
 Coco lo intentó… ¡y encestó con la oreja!
@@ -57,7 +57,7 @@ Coco lo intentó… ¡y encestó con la oreja!
   },
   {
     title: "Capítulo 3: Golpes con tentáculos",
-    image: "/imagenes/cuentos/deportes/cap-3.png",
+    image: "/images/stories/deportes/cap-3.png",
     text: `—¡El truco es esquivar bailando! —explicó el pulpo.
 Coco se puso los guantes y giró sobre sus patitas.
 Un golpe, otro… ¡y una voltereta final!
@@ -65,7 +65,7 @@ Un golpe, otro… ¡y una voltereta final!
   },
   {
     title: "Capítulo 4: Raquetas y paciencia",
-    image: "/imagenes/cuentos/deportes/cap-4.png",
+    image: "/images/stories/deportes/cap-4.png",
     text: `—El tenis es como meditar —dijo la tortuga con calma.
 Coco quería correr, pero aprendió a esperar el momento.
 Con un toque suave… ¡punto para Coco!
@@ -73,7 +73,7 @@ Con un toque suave… ¡punto para Coco!
   },
   {
     title: "Capítulo 5: Motozumbidos",
-    image: "/imagenes/cuentos/deportes/cap-5.png",
+    image: "/images/stories/deportes/cap-5.png",
     text: `Zuuum… ¡la abeja volaba con su moto mini!
 —¡Vamos, Coco, sigue la curva con ritmo!
 Coco aceleró, giró… ¡y voló (casi) como una abeja!

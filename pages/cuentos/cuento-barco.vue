@@ -41,7 +41,7 @@ import { ref, computed, onMounted } from "vue";
 const pages = [
   {
     title: "Capítulo 1: El Barco Sorpresa",
-    image: "/imagenes/cuentos/barco/cap-1.png",
+    image: "/images/stories/barco/cap-1.png",
     text: `Una mañana, Coco encontró una carta junto a su cuenco de comida:
           “Querido Coco, ¡te invitamos a un viaje en barco!
           Firma: Capitán Pez”.
@@ -52,7 +52,7 @@ const pages = [
   },
   {
     title: "Capítulo 2: La ballena que cantaba",
-    image: "/imagenes/cuentos/barco/cap-2.png",
+    image: "/images/stories/barco/cap-2.png",
     text: `Navegando por el mar azul, Coco escuchó una melodía.
 —¿Quién canta tan bonito? —preguntó.
 
@@ -64,7 +64,7 @@ Coco ladró fuerte y la ballena sonrió al escucharlo rebotar.
   },
   {
     title: "Capítulo 3: El pulpo enredado",
-    image: "/imagenes/cuentos/barco/cap-3.png",
+    image: "/images/stories/barco/cap-3.png",
     text: `Entre olas suaves, Coco vio burbujas y... ¡tentáculos!
 Un pulpo se había enredado con una red de pesca.
 —¡No puedo bailar! —se lamentó.
@@ -75,7 +75,7 @@ El pulpo giró sobre sí mismo feliz:
   },
   {
     title: "Capítulo 4: La tormenta traviesa",
-    image: "/imagenes/cuentos/barco/cap-4.png",
+    image: "/images/stories/barco/cap-4.png",
     text: `El cielo se volvió gris. ¡Rayos! ¡Truenos!
 Coco se escondió bajo una manta en el barco.
 Pero luego pensó:
@@ -88,7 +88,7 @@ Y la tormenta... se fue.`,
   },
   {
     title: "Capítulo 5: El tesoro invisible",
-    image: "/imagenes/cuentos/barco/cap-5.png",
+    image: "/images/stories/barco/cap-5.png",
     text: `Una luz brilló en el agua. Coco siguió el reflejo...
 Pero al llegar, solo había una botella con un papel:
 
