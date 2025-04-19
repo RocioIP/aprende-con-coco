@@ -1,8 +1,8 @@
 <template>
   <div
-    class="position-relative overflow-hidden"
+    class=" overflow-hidden position-relative"
     :key="gameKey"
-    style="height: 100dvh; width: 100vw"
+    style="min-height: 100vh;"
   >
     <!-- Frase con color -->
     <h3 v-if="!hasWon" class="text-center mt-3">

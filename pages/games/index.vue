@@ -19,7 +19,7 @@
 
       <!-- Tarjeta: Números -->
       <div class="col-6 col-md-4 col-lg-3">
-        <NuxtLink to="/games/animal-sounds" class="card juego-card">
+        <NuxtLink to="/games/animalsound" class="card juego-card">
           <img src="/images/games/friends.png" alt="Juego de amigos" class="card-img-top" />
         </NuxtLink>
       </div>
