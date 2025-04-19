@@ -23,13 +23,13 @@
       >
         <ul class="navbar-nav">
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/juegos">🎈 Jogos</NuxtLink>
+            <NuxtLink class="nav-link" to="/games">🎈 Jogos</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/cuentos">📖 Histórias</NuxtLink>
+            <NuxtLink class="nav-link" to="/stories">📖 Histórias</NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link" to="/pizarra">🎨 Quadro-negro</NuxtLink>
+            <NuxtLink class="nav-link" to="/blackboard">🎨 Quadro-negro</NuxtLink>
           </li>
           <!-- <li class="nav-item">
             <NuxtLink class="nav-link" to="/analitica">📊 Analítica</NuxtLink>

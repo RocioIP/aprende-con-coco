@@ -32,9 +32,9 @@
 
 <script setup>
 import { ref } from "vue";
-import CuentoUno from "@/pages/cuentos/cuento-barco.vue";
-import CuentoDos from "@/pages/cuentos/cuento-luna.vue";
-import CuentoTres from "@/pages/cuentos/cuento-deportes.vue";
+import CuentoUno from "@/pages/stories/BoatStory.vue";
+import CuentoDos from "@/pages/stories/MoonStory.vue";
+import CuentoTres from "@/pages/stories/SportsStory.vue";
 
 const cuentoSeleccionado = ref(null);
 

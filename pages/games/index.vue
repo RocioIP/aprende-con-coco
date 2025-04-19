@@ -5,21 +5,21 @@
     <div class="row justify-content-center g-4">
       <!-- Tarjeta: Colores -->
       <div class="col-6 col-md-4 col-lg-3">
-        <NuxtLink to="/juegos/colores" class="card juego-card">
+        <NuxtLink to="/games/balloons" class="card juego-card">
           <img src="/images/games/balloons.png" alt="Juego de globos" class="card-img-top" />
         </NuxtLink>
       </div>
 
       <!-- Tarjeta: Letras -->
       <div class="col-6 col-md-4 col-lg-3">
-        <NuxtLink to="/juegos/letras" class="card juego-card">
+        <NuxtLink to="/games/letters" class="card juego-card">
           <img src="/images/games/letters.png" alt="Juego de letras" class="card-img-top" />
         </NuxtLink>
       </div>
 
       <!-- Tarjeta: Números -->
       <div class="col-6 col-md-4 col-lg-3">
-        <NuxtLink to="/juegos/numeros" class="card juego-card">
+        <NuxtLink to="/games/animal-sounds" class="card juego-card">
           <img src="/images/games/friends.png" alt="Juego de amigos" class="card-img-top" />
         </NuxtLink>
       </div>

@@ -1,12 +1,16 @@
 <template>
   <div class="container py-5 text-center">
-    <h2 class="mb-4 text-primary">¿Qué letra es esta?</h2>
+    <h2 class="mb-4 text-primary display-5">
+      Com qual é que se assemelha?
+    </h2>
 
     <!-- Letra a arrastrar -->
     <div
-      class="display-1 fw-bold text-info mb-5 draggable-letter"
+      class="draggable-letter mb-5 mx-auto"
       draggable="true"
       @dragstart="onDragStart"
+      @touchstart.prevent="onTouchStart"
+      @touchend="onTouchEnd"
     >
       {{ currentLetter.letter }}
     </div>
@@ -14,12 +18,12 @@
     <!-- Opciones -->
     <div class="row justify-content-center g-4">
       <div
-        class="col-12 col-md-4"
+        class="col-6 col-md-3"
         v-for="(option, index) in currentLetter.options"
         :key="index"
       >
         <div
-          class="border rounded-4 p-4 h-100 dropzone"
+          class="dropzone fs-1"
           :class="{
             'bg-success text-white': result === 'correct' && option === currentLetter.answer,
             'bg-danger text-white': result === 'wrong' && option !== currentLetter.answer
@@ -27,32 +31,32 @@
           @dragover.prevent
           @drop="onDrop(option)"
         >
-          <span class="fs-2">{{ option }}</span>
+          {{ option }}
         </div>
       </div>
     </div>
 
     <!-- Feedback -->
-    <div v-if="result" class="mt-4 fs-4 fw-semibold" :class="{
+    <div v-if="result" class="mt-4 fs-3 fw-bold" :class="{
       'text-success': result === 'correct',
       'text-danger': result === 'wrong'
     }">
-      {{ result === 'correct' ? '¡Muy bien!' : 'Ups, intenta de nuevo' }}
+      {{ result === 'correct' ? '🎉 Muito bem!' : '😬 Ups, tenta de novo' }}
     </div>
 
     <!-- Botón siguiente -->
     <button
-      class="btn btn-primary mt-4"
+      class="btn btn-lg btn-primary mt-4 px-5 py-2"
       @click="nextQuestion"
       :disabled="!result"
     >
-      Siguiente
+      👉 Próxima
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const questions = [
   { letter: 'A', answer: 'A', options: ['A', 'B'] },
@@ -64,15 +68,48 @@ const questions = [
 const index = ref(0)
 const result = ref(null)
 const currentLetter = ref(questions[index.value])
+const draggedLetter = ref(null)
+
+let audioCorrect = null
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    audioCorrect = new Audio('/audio/boa.mp3')
+    speakText("Com qual é que se assemelha?")
+  }
+})
+
+function speakText(text) {
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = "pt-PT"
+  speechSynthesis.cancel()
+  speechSynthesis.speak(utterance)
+}
 
 const onDragStart = (event) => {
   event.dataTransfer.setData('text/plain', currentLetter.value.letter)
+  draggedLetter.value = currentLetter.value.letter
+}
+
+const onTouchStart = () => {
+  draggedLetter.value = currentLetter.value.letter
+}
+
+const onTouchEnd = (event) => {
+  const touch = event.changedTouches[0]
+  const element = document.elementFromPoint(touch.clientX, touch.clientY)
+
+  if (element && element.classList.contains('dropzone')) {
+    const selectedOption = element.innerText.trim()
+    onDrop(selectedOption)
+  }
 }
 
 const onDrop = (option) => {
-  const dragged = currentLetter.value.letter
+  const dragged = draggedLetter.value
   if (option === dragged) {
     result.value = 'correct'
+    audioCorrect?.play()
   } else {
     result.value = 'wrong'
   }
@@ -84,8 +121,7 @@ const nextQuestion = () => {
     index.value++
     currentLetter.value = questions[index.value]
   } else {
-    // Final del juego
-    alert('¡Has terminado!')
+    speakText("Muito bem! Terminaste o jogo!")
     index.value = 0
     currentLetter.value = questions[0]
   }
@@ -94,66 +130,37 @@ const nextQuestion = () => {
 
 <style scoped>
 .draggable-letter {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #0dcaf0;
+  background: #e7f9ff;
+  width: 140px;
+  height: 140px;
+  line-height: 140px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   cursor: grab;
   user-select: none;
 }
 
 .dropzone {
-  min-height: 150px;
+  min-height: 120px;
+  border: 4px dashed #ccc;
+  border-radius: 20px;
+  padding: 30px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px dashed #ccc;
-  transition: all 0.3s ease;
 }
 .dropzone:hover {
-  border-color: #007bff;
+  border-color: #0d6efd;
+  background: #eef5ff;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
-
-
-
-
-
-<!-- <script setup>
-import { ref } from 'vue'
-
-// Preguntas
-const questions = [
-  { letter: 'A', answer: 'A', options: ['A', 'B'] },
-  { letter: 'M', answer: 'M', options: ['M', 'N'] },
-]
-
-const index = ref(0)
-const result = ref(null)
-const currentLetter = ref(questions[index.value])
-
-// Cargar audio
-const audioCorrect = new Audio('/audio/boa.mp3')
-
-const onDragStart = (event) => {
-  event.dataTransfer.setData('text/plain', currentLetter.value.letter)
-}
-
-const onDrop = (option) => {
-  const dragged = currentLetter.value.letter
-  if (option === dragged) {
-    result.value = 'correct'
-    audioCorrect.play() // 🔊 ¡Reproduce sonido!
-  } else {
-    result.value = 'wrong'
-  }
-}
-
-const nextQuestion = () => {
-  result.value = null
-  if (index.value < questions.length - 1) {
-    index.value++
-    currentLetter.value = questions[index.value]
-  } else {
-    alert('¡Has terminado!')
-    index.value = 0
-    currentLetter.value = questions[0]
-  }
-}
-</script> -->

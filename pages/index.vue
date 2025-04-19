@@ -21,13 +21,13 @@
 
     <!-- Botones grandes debajo de Coco -->
     <div class="d-flex gap-5">
-      <NuxtLink to="/juegos" @click="stopSpeaking" class="btn btn-warning btn-lg rounded-pill shadow-sm pulse-button">
+      <NuxtLink to="/games" @click="stopSpeaking" class="btn btn-warning btn-lg rounded-pill shadow-sm pulse-button">
         🎈 Jogos
       </NuxtLink>
-      <NuxtLink to="/cuentos" @click="stopSpeaking" class="btn btn-primary btn-lg rounded-pill shadow-sm pulse-button">
+      <NuxtLink to="/stories" @click="stopSpeaking" class="btn btn-primary btn-lg rounded-pill shadow-sm pulse-button">
         📖 Histórias
       </NuxtLink>
-      <NuxtLink to="/pizarra" @click="stopSpeaking" class="btn btn-danger btn-lg rounded-pill shadow-sm pulse-button">
+      <NuxtLink to="/blackboard" @click="stopSpeaking" class="btn btn-danger btn-lg rounded-pill shadow-sm pulse-button">
         🎨 Quadro-negro
       </NuxtLink>
     </div>

@@ -150,32 +150,42 @@ onMounted(() => {
 <style scoped>
 .pizarra-layout {
   display: flex;
-  height: 80vh;
+  flex-wrap: wrap; /* Permite que los elementos se muevan a la siguiente línea en pantallas pequeñas */
+  height: auto;
 }
 
+/* Áreas principales */
+.mascota-area,
+.pizarra-area,
+.herramientas {
+  padding: 1rem;
+}
+
+/* Mascota en su columna */
 .mascota-area {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
 }
 
+/* Imagen de mascota */
 .mascota-img {
   max-width: 100%;
   max-height: 60%;
   object-fit: contain;
 }
 
+/* Pizarra al centro */
 .pizarra-area {
   flex: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
 }
 
+/* Bordes y estilo de pizarra */
 .pizarra-borde {
   width: 100%;
   max-width: 900px;
@@ -187,6 +197,7 @@ onMounted(() => {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
+/* Canvas */
 .pizarra {
   width: 100%;
   height: 100%;
@@ -196,16 +207,17 @@ onMounted(() => {
   cursor: crosshair;
 }
 
+/* Herramientas en columna (por defecto) */
 .herramientas {
   flex: 0.5;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
   gap: 1rem;
 }
 
+/* Paleta vertical por defecto */
 .paleta-vertical {
   display: flex;
   flex-direction: column;
@@ -213,6 +225,7 @@ onMounted(() => {
   align-items: center;
 }
 
+/* Colores redondos */
 .color {
   width: 40px;
   height: 40px;
@@ -227,6 +240,7 @@ onMounted(() => {
   border: 3px solid #333;
 }
 
+/* Botón limpiar */
 .btn-limpiar {
   font-size: 2rem;
   background-color: transparent;
@@ -238,4 +252,33 @@ onMounted(() => {
 .btn-limpiar:hover {
   transform: scale(1.2);
 }
+
+/* ✅ MODO RESPONSIVE: Móvil */
+@media (max-width: 768px) {
+  .pizarra-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mascota-area,
+  .herramientas {
+    width: 100%;
+  }
+
+  .herramientas {
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+
+  .paleta-vertical {
+    flex-direction: row; /* ✅ Coloca los colores en fila */
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .color {
+    margin: 0 5px;
+  }
+}
+
 </style>
