@@ -11,6 +11,8 @@
       @mouseup="stopDraw"
       @mouseleave="stopDraw"
     ></canvas>
+
+    <!-- Imagen a la derecha cuando se completa -->
     <div v-if="estado === 'completado'" class="imagen-figura">
       <img
         :src="`/images/blackboard/figuras/${imagenes[figuras[figuraActual]]}`"
@@ -34,14 +36,7 @@ const canvas = ref(null);
 const ctx = ref(null);
 const dibujando = ref(false);
 
-const figuras = [
-  "circulo",
-  "cuadrado",
-  "triangulo",
-  "rectangulo",
-  "estrella",
-  "corazon",
-];
+const figuras = ["circulo", "cuadrado", "triangulo", "rectangulo", "estrella", "corazon"];
 
 const imagenes = {
   circulo: "bola.png",
@@ -51,11 +46,27 @@ const imagenes = {
   estrella: "estrella.png",
   corazon: "corazon.png",
 };
+
 const figuraActual = ref(0);
 const puntos = ref([]);
 const puntosVisitados = ref(new Set());
 const umbral = 25;
 const estado = ref("puntos");
+
+const DOT_SPACING = 30;
+const DOT_RADIUS = 10;
+
+function sampleLine(x1, y1, x2, y2, spacing = DOT_SPACING) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  const n = Math.max(1, Math.floor(len / spacing));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    out.push([x1 + dx * t, y1 + dy * t]);
+  }
+  return out;
+}
 
 onMounted(() => {
   const c = canvas.value;
@@ -73,61 +84,70 @@ const iniciarFigura = () => {
 
   const width = canvas.value.width;
   const height = canvas.value.height;
-  const cx = width / 2;
+
+  // figura un poco más cerca del centro
+  const cx = width * 0.42;
   const cy = height / 2;
-  const size = 100;
+  const size = Math.min(width, height) * 0.18;
 
   const shapes = {
-    circulo: Array.from({ length: 12 }, (_, i) => {
-      const angle = (i / 12) * 2 * Math.PI;
+    circulo: Array.from({ length: 24 }, (_, i) => {
+      const angle = (i / 24) * 2 * Math.PI;
       return [cx + size * Math.cos(angle), cy + size * Math.sin(angle)];
     }),
+
     cuadrado: [
-      [cx - size, cy - size],
-      [cx, cy - size],
-      [cx + size, cy - size],
-      [cx + size, cy],
-      [cx + size, cy + size],
-      [cx, cy + size],
-      [cx - size, cy + size],
-      [cx - size, cy],
+      ...sampleLine(cx - size, cy - size, cx + size, cy - size),
+      ...sampleLine(cx + size, cy - size, cx + size, cy + size),
+      ...sampleLine(cx + size, cy + size, cx - size, cy + size),
+      ...sampleLine(cx - size, cy + size, cx - size, cy - size),
     ],
-    triangulo: [
-      [cx, cy - size],
-      [cx + size, cy + size],
-      [cx, cy + size / 2],
-      [cx - size, cy + size],
-    ],
+
     rectangulo: [
-      [cx - size, cy - size / 2],
-      [cx, cy - size / 2],
-      [cx + size, cy - size / 2],
-      [cx + size, cy + size / 2],
-      [cx, cy + size / 2],
-      [cx - size, cy + size / 2],
+      ...sampleLine(cx - size, cy - size / 1.5, cx + size, cy - size / 1.5),
+      ...sampleLine(cx + size, cy - size / 1.5, cx + size, cy + size / 1.5),
+      ...sampleLine(cx + size, cy + size / 1.5, cx - size, cy + size / 1.5),
+      ...sampleLine(cx - size, cy + size / 1.5, cx - size, cy - size / 1.5),
     ],
-    estrella: [
-      [cx, cy - size],
-      [cx + 20, cy - 20],
-      [cx + size, cy - 20],
-      [cx + 30, cy + 10],
-      [cx + 60, cy + size],
-      [cx, cy + 40],
-      [cx - 60, cy + size],
-      [cx - 30, cy + 10],
-      [cx - size, cy - 20],
-      [cx - 20, cy - 20],
-    ],
-    corazon: [
-      [cx, cy + 50],
-      [cx + 40, cy + 20],
-      [cx + 40, cy - 10],
-      [cx + 20, cy - 30],
-      [cx, cy - 10],
-      [cx - 20, cy - 30],
-      [cx - 40, cy - 10],
-      [cx - 40, cy + 20],
-    ],
+
+    triangulo: (() => {
+      const p1 = [cx, cy - size];
+      const p2 = [cx + size, cy + size];
+      const p3 = [cx - size, cy + size];
+      return [
+        ...sampleLine(...p1, ...p2),
+        ...sampleLine(...p2, ...p3),
+        ...sampleLine(...p3, ...p1),
+      ];
+    })(),
+
+    estrella: (() => {
+      const outerR = size;
+      const innerR = size * 0.55;
+      const points = [];
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = (i * Math.PI) / 5 - Math.PI / 2;
+        points.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+      }
+      const outline = [];
+      for (let i = 0; i < points.length; i++) {
+        outline.push(...sampleLine(...points[i], ...points[(i + 1) % points.length]));
+      }
+      return outline;
+    })(),
+
+    corazon: (() => {
+      const pts = [];
+      const steps = 28; // menos puntos para más separación
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * Math.PI * 2;
+        const x = 16 * Math.sin(t) ** 3;
+        const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        pts.push([cx + (x * size) / 16, cy + (y * size) / 13]);
+      }
+      return pts;
+    })(),
   };
 
   const path = shapes[figuras[figuraActual.value]];
@@ -135,7 +155,7 @@ const iniciarFigura = () => {
 
   puntos.value.forEach((p) => {
     ctx.value.beginPath();
-    ctx.value.arc(p.x, p.y, 10, 0, Math.PI * 2);
+    ctx.value.arc(p.x, p.y, DOT_RADIUS, 0, Math.PI * 2);
     ctx.value.fillStyle = "rgba(0,0,0,0.15)";
     ctx.value.fill();
   });
@@ -169,14 +189,14 @@ const stopDraw = () => {
 };
 
 const verificarPunto = (x, y) => {
+  if (estado.value !== "puntos") return;
+
   puntos.value.forEach((p, index) => {
     if (!puntosVisitados.value.has(index)) {
-      const dx = p.x - x;
-      const dy = p.y - y;
-      if (Math.sqrt(dx * dx + dy * dy) < umbral) {
+      if (Math.hypot(p.x - x, p.y - y) < umbral) {
         puntosVisitados.value.add(index);
         ctx.value.beginPath();
-        ctx.value.arc(p.x, p.y, 10, 0, Math.PI * 2);
+        ctx.value.arc(p.x, p.y, DOT_RADIUS, 0, Math.PI * 2);
         ctx.value.fillStyle = "#32cd32";
         ctx.value.fill();
       }
@@ -193,17 +213,6 @@ const completarFigura = async () => {
   lanzarConfeti();
 
   await nextTick();
-
-  ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
-  ctx.value.font = `${canvas.value.height * 0.15}px Arial`;
-  ctx.value.fillStyle = "#32cd32";
-  ctx.value.textAlign = "center";
-  ctx.value.textBaseline = "middle";
-  ctx.value.fillText(
-    figuras[figuraActual.value].toUpperCase(),
-    canvas.value.width / 2,
-    canvas.value.height / 2
-  );
 
   if (figuraActual.value < figuras.length - 1) {
     setTimeout(() => {
@@ -253,24 +262,22 @@ const speakText = (text) => {
 
 .imagen-figura {
   position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  right: 8%;
+  transform: translateY(-50%);
   text-align: center;
+  pointer-events: none;
 }
 
 .imagen-figura img {
-  max-width: 150px;
-  max-height: 150px;
-  animation: aparecer 1s ease;
+  max-width: 180px;
+  max-height: 180px;
+  animation: aparecer 0.8s ease;
 }
 
 .reset-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: center;
@@ -290,13 +297,7 @@ const speakText = (text) => {
 }
 
 @keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(20px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 </style>
