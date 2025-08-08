@@ -4,7 +4,7 @@
     class="balloon d-flex justify-content-center align-items-center"
     :class="{ shake: isShaking }"
     @click="handleClick"
-    @touchstart="handleClick"
+    @touchstart.stop.prevent="handleClick"
     :style="balloonStyle"
   >
     <span class="balloon-text">{{ letter }}</span>
@@ -12,30 +12,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
-  x: Number,
-  y: Number,
-  color: String,
-  letter: String,
-  targetColor: String,
+  x: { type: Number, required: true },
+  y: { type: Number, required: true },
+  color: { type: String, required: true },
+  letter: { type: String, required: true },
+  targetColor: { type: String, required: true },
 })
 
 const emit = defineEmits(['correct', 'wrong'])
 
 const visible = ref(true)
 const isShaking = ref(false)
-const popSound = new Audio('/sounds/pop.mp3')
-const errorSound = new Audio('/sounds/error.mp3')
+
+let popSound, errorSound
+
+// Medidas usadas en el CSS
+const BALLOON_W = 100
+const BALLOON_H = 120
+
+onMounted(() => {
+  popSound = new Audio('/sounds/pop.mp3')
+  errorSound = new Audio('/sounds/error.mp3')
+})
 
 const handleClick = () => {
   if (props.color === props.targetColor) {
-    popSound.play()
+    popSound?.play()
     visible.value = false
-    emit('correct')
+    const centerX = props.x + BALLOON_W / 2
+    const centerY = props.y + BALLOON_H / 2
+    emit('correct', { x: centerX, y: centerY })
   } else {
-    errorSound.play()
+    errorSound?.play()
     isShaking.value = true
     emit('wrong')
     setTimeout(() => {
@@ -54,9 +65,9 @@ const balloonStyle = computed(() => ({
 <style scoped>
 .balloon {
   position: absolute;
-  width: 80px;
-  height: 100px;
-  border-radius: 50% 50% 50% 50%;
+  width: 100px;
+  height: 120px;
+  border-radius: 50%;
   cursor: pointer;
   user-select: none;
   transition: transform 0.2s ease, opacity 0.2s ease;
@@ -98,7 +109,6 @@ const balloonStyle = computed(() => ({
   z-index: 2;
 }
 
-/* Animación de sacudida */
 .shake {
   animation: shake 0.3s;
 }
@@ -111,7 +121,6 @@ const balloonStyle = computed(() => ({
   100% { transform: translateX(0); }
 }
 
-/* Animación de flotación */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }

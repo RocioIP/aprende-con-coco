@@ -1,6 +1,6 @@
 <template>
   <div class="container py-5 text-center">
-    <h2 class="display-5 mb-4 text-primary">Escolha um jogo</h2>
+    <h2 class="display-5 mb-4 text-primary fw-bold">Escolha um jogo</h2>
 
     <div class="row justify-content-center g-4">
       <!-- Tarjeta: Colores -->

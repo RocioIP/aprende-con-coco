@@ -1,194 +1,296 @@
 <template>
-  <div
-    class=" overflow-hidden position-relative"
-    :key="gameKey"
-    style="min-height: 100vh;"
-  >
-    <!-- Frase con color -->
-    <h3 v-if="!hasWon" class="text-center mt-3">
+  <div class="game-container" ref="containerEl">
+    <h3 v-if="!hasWon" class="display-5 fw-bold text-center mt-3">
       Toca no balão colorido
       <span :style="{ color: targetColor, fontWeight: 'bold' }">
         {{ colorNames[targetColor] }}
       </span>
     </h3>
 
-    <!-- Globos -->
-    <Balloon
-      v-for="(b, index) in balloons"
-      :key="index"
-      :x="b.x"
-      :y="b.y"
-      :color="b.color"
-      :letter="b.letter"
-      :targetColor="targetColor"
-      @correct="handleCorrect(b.color)"
-      @wrong="handleWrong"
-    />
+    <div ref="boardEl" class="balloons-board position-relative mx-auto">
+      <Balloon
+        v-for="(b, index) in balloons"
+        :key="index"
+        :x="b.x"
+        :y="b.y"
+        :color="b.color"
+        :letter="b.letter"
+        :targetColor="targetColor"
+        @correct="({ x, y }) => handleCorrect(b.color, x, y)"
+        @wrong="handleWrong"
+      />
+    </div>
 
-    <!-- Mensaje de victoria -->
-    <div
-      v-if="hasWon"
-      class="win-message d-flex justify-content-center align-items-center flex-column"
-    >
-      <h1 class="display-1 fw-bold text-center">¡Boa Eduardo! 🎉</h1>
-      <img src="/images/global/coco-aplaudiendo.png" alt="Coco aplaudiendo" class="img-coco-aplaudiendo">
-      <canvas
-        id="confetti-canvas"
-        class="position-absolute top-0 start-0 w-100 h-100"
-      ></canvas>
-      
-     <!--  <button class="btn btn-success mt-4" @click="resetGame">
-        🔁 Voltar a jogar
-      </button> -->
+    <div v-if="hasWon" class="win-overlay">
+      <div class="win-card">
+        <h1 class="display-6 fw-bold text-center mb-3">¡Boa Eduardo! 🎉</h1>
+        <img
+          src="/images/global/coco-aplaudiendo.png"
+          alt="Coco aplaudiendo"
+          class="img-coco-aplaudiendo"
+        />
+        <div class="d-flex gap-2 justify-content-center mt-4">
+          <button class="btn-mais-uma" @click="resetGame">🎈 Mais uma!</button>
+          <button class="btn-salir" @click="goToGames">✖ Fechar</button>
+        </div>
+      </div>
+      <canvas id="confetti-canvas" class="confetti-canvas" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
-import Balloon from "@/components/Balloon.vue";
-import confetti from "canvas-confetti";
+import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import Balloon from '@/components/Balloon.vue'
+import confetti from 'canvas-confetti'
 
-// Refs
-const balloons = ref([]);
-const targetColor = ref("");
-const usedColors = ref([]);
-const hasWon = ref(false);
-const gameKey = ref(0); // clave para reiniciar el DOM
+const router = useRouter()
 
-// Letras y colores
-const vowels = ["A", "E", "I", "O", "U"];
+const balloons = ref([])
+const targetColor = ref('')
+const usedColors = ref([])
+const hasWon = ref(false)
+
+const containerEl = ref(null)
+const boardEl = ref(null)
+
+const vowels = ['A', 'E', 'I', 'O', 'U']
 const colorByVowel = {
-  A: "#FF6B6B",
-  E: "#FFD93D",
-  I: "#4D96FF",
-  O: "#6BCB77",
-  U: "#FF8000",
-};
-
+  A: '#FF6B6B',
+  E: '#FFD93D',
+  I: '#4D96FF',
+  O: '#6BCB77',
+  U: '#FF8000',
+}
 const colorNames = {
-  "#FF6B6B": "vermelho",
-  "#FFD93D": "amarelo",
-  "#4D96FF": "azul",
-  "#6BCB77": "verde",
-  "#FF8000": "laranja",
-};
+  '#FF6B6B': 'vermelho',
+  '#FFD93D': 'amarelo',
+  '#4D96FF': 'azul',
+  '#6BCB77': 'verde',
+  '#FF8000': 'laranja',
+}
 
 let errorSound
-// 🧠 Inicia el juego al cargar
+
 onMounted(() => {
-  errorSound = new Audio('/sounds/error.mp3');
-  initGame();
-});
+  errorSound = new Audio('/sounds/error.mp3')
+  initGame()
+})
 
-// 🔁 Reinicia todo el juego
-async function resetGame() {
-  hasWon.value = false;
-  await nextTick();      // asegura que se oculte la pantalla de victoria
-  gameKey.value++;       // fuerza el reinicio de toda la vista
-  initGame();
-}
-
-// 🔄 Lógica para iniciar o reiniciar el juego
 function initGame() {
-  balloons.value = [];
-  hasWon.value = false;
-  usedColors.value = [];
-  targetColor.value = "";
+  const balloonWidth = 100
+  const balloonHeight = 120
+  const cuerdaExtra = 40
+  const margin = 12
 
-  const screenW = window.innerWidth;
-  const screenH = window.innerHeight;
-  const spacing = 120;
+  const boardRect = boardEl.value?.getBoundingClientRect()
+  const boardW = boardRect?.width || Math.min(window.innerWidth, 900)
+  const boardH = 900
 
-  vowels.forEach((letter, i) => {
-    balloons.value.push({
-      letter,
-      color: colorByVowel[letter],
-      x: screenW / 2 - 250 + i * spacing,
-      y: screenH / 2 - 100,
-    });
-  });
+  const CLUSTER_PADDING_TOP = 80
+  const CLUSTER_HEIGHT = 520
+  const CLUSTER_WIDTH_RATIO = 0.8
 
-  pickNextTarget();
+  const clusterW = boardW * CLUSTER_WIDTH_RATIO
+  const clusterH = Math.min(CLUSTER_HEIGHT, boardH - CLUSTER_PADDING_TOP - 40)
+  const clusterX0 = (boardW - clusterW) / 2
+  const clusterY0 = CLUSTER_PADDING_TOP
+
+  const maxX = clusterX0 + clusterW - balloonWidth - margin
+  const maxY = clusterY0 + clusterH - balloonHeight - cuerdaExtra - margin
+
+  const positions = []
+  const isOverlapping = (x, y) =>
+    positions.some(
+      pos =>
+        Math.abs(pos.x - x) < balloonWidth + margin &&
+        Math.abs(pos.y - y) < balloonHeight + margin
+    )
+
+  balloons.value = []
+  hasWon.value = false
+  usedColors.value = []
+  targetColor.value = ''
+
+  vowels.forEach(letter => {
+    let tries = 0
+    let x, y
+    do {
+      x = Math.random() * (maxX - clusterX0) + clusterX0
+      y = Math.random() * (maxY - clusterY0) + clusterY0
+      tries++
+    } while (isOverlapping(x, y) && tries < 100)
+
+    positions.push({ x, y })
+    balloons.value.push({ letter, color: colorByVowel[letter], x, y })
+  })
+
+  requestAnimationFrame(() => {
+    containerEl.value?.scrollTo({ top: 0, behavior: 'instant' })
+  })
+
+  pickNextTarget()
 }
 
-// 🎯 Selecciona el color objetivo y habla
 const pickNextTarget = async () => {
   const remaining = balloons.value
-    .map((b) => b.color)
-    .filter((c) => !usedColors.value.includes(c));
+    .map(b => b.color)
+    .filter(c => !usedColors.value.includes(c))
 
   if (remaining.length > 0) {
-    const next = remaining[Math.floor(Math.random() * remaining.length)];
-    targetColor.value = next;
-
-    const colorWord = colorNames[next];
-    const sentence = `Toca no balão colorido ${colorWord}`;
-    speakText(sentence);
+    const next = remaining[Math.floor(Math.random() * remaining.length)]
+    targetColor.value = next
+    speakText(`Toca no balão colorido ${colorNames[next]}`)
   } else {
-    hasWon.value = true;
-    await nextTick();
-    speakText("Boa Eduardo!");
-    launchConfetti();
+    hasWon.value = true
+    await nextTick()
+    speakText('Boa Eduardo!')
+    launchConfetti()
   }
-};
-
-// 🗣️ Texto a voz
-function speakText(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "pt-PT"; // o pt-BR si lo prefieres
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utterance);
 }
 
-// 🎉 Confetti de victoria
-const launchConfetti = () => {
-  const canvas = document.getElementById("confetti-canvas");
+function speakText(text) {
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = 'pt-PT'
+  speechSynthesis.cancel()
+  speechSynthesis.speak(u)
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas')
   if (canvas) {
-    const myConfetti = confetti.create(canvas, { resize: true });
+    const myConfetti = confetti.create(canvas, { resize: true, useWorker: true })
     myConfetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.6 },
-    });
+      particleCount: 180,
+      spread: 90,
+      startVelocity: 45,
+      gravity: 0.9,
+      origin: { x: 0.5, y: 0.5 }
+    })
   }
-};
+}
 
-// ✅ Acertó
-const handleCorrect = (color) => {
-  usedColors.value.push(color);
-  pickNextTarget();
-};
+function popConfettiAt(centerX, centerY) {
+  const rect = boardEl.value?.getBoundingClientRect()
+  if (!rect) return
+  const clientX = rect.left + centerX
+  const clientY = rect.top + centerY
+  const originX = clientX / window.innerWidth
+  const originY = clientY / window.innerHeight
 
-// ❌ Falló
+  confetti({
+    particleCount: 60,
+    spread: 55,
+    startVelocity: 35,
+    gravity: 0.9,
+    ticks: 120,
+    origin: { x: originX, y: originY }
+  })
+}
+
+async function resetGame() {
+  hasWon.value = false
+  usedColors.value = []
+  targetColor.value = ''
+  balloons.value = []
+  await nextTick()
+  initGame()
+}
+
+function goToGames() {
+  router.push('/games')
+}
+
+const handleCorrect = (color, centerX, centerY) => {
+  usedColors.value.push(color)
+  popConfettiAt(centerX, centerY)
+  pickNextTarget()
+}
 
 const handleWrong = () => {
-  errorSound.currentTime = 0;
-  errorSound.play();
-};
+  errorSound.currentTime = 0
+  errorSound.play()
+}
 </script>
 
 <style scoped>
-.win-message {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.9);
-  z-index: 10;
-  text-align: center;
-  padding: 1rem;
+.game-container {
+  width: 100vw;
+  min-height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  padding-bottom: 2rem;
 }
 
-button.btn-success {
-  font-size: 1.2rem;
-  padding: 10px 25px;
-  border-radius: 12px;
-  font-weight: bold;
+.balloons-board {
+  width: min(100%, 900px);
+  min-height: 900px;
+  margin: 1rem auto 2rem;
+  position: relative;
+}
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.35);
+  z-index: 1040;
+  pointer-events: none;
+}
+
+.win-card {
+  pointer-events: auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  text-align: center;
+  max-width: 420px;
+  width: calc(100% - 2rem);
+}
+
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .img-coco-aplaudiendo {
-  width: 25%;
+  width: min(40vw, 220px);
+  max-width: 220px;
+}
+
+.btn-mais-uma,
+.btn-salir {
+  border: none;
+  border-radius: 30px;
+  padding: 0.65rem 1.4rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+  transition: transform .15s ease, background-color .15s ease;
+  cursor: pointer;
+}
+
+.btn-mais-uma {
+  background-color: #108818;
+  color: #fff;
+}
+.btn-mais-uma:hover { background-color: #198e09; transform: translateY(-1px); }
+
+.btn-salir {
+  background: #e9ecef;
+  color: #333;
+}
+.btn-salir:hover { background: #dee2e6; transform: translateY(-1px); }
+
+@media (max-width: 600px) {
+  .img-coco-aplaudiendo { width: 45vw; }
+  .btn-mais-uma, .btn-salir { padding: 0.55rem 1.1rem; }
 }
 </style>
