@@ -1,93 +1,156 @@
 <template>
-  <div class="story-container">
-    <div class="story-content">
+  <div
+    class="story-container"
+    ref="frameEl"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerCancel"
+    @pointerleave="onPointerCancel"
+  >
+    <div class="story-content" :class="slideClass">
       <div class="story-image">
-        <img :src="currentPage.image" alt="Imagen del cuento" />
+        <img :src="currentPage.image" alt="Imagem do conto" draggable="false" />
       </div>
       <div class="story-text">
         <h2>{{ currentPage.title }}</h2>
-        <p>{{ currentPage.text }}</p>
+        <p v-for="(p, i) in paragraphs" :key="i">{{ p }}</p>
       </div>
     </div>
-    <div class="nav-buttons">
-      <button @click="prevPage" :disabled="currentPageIndex === 0">← Anterior</button>
-      <button @click="nextPage" :disabled="currentPageIndex === pages.length - 1">Siguiente →</button>
-    </div>
+
+    <!-- Pista sutil para deslizar -->
+    <div class="swipe-hint">Desliza para continuar</div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 
+/* ======== Páginas do conto (PT-PT) ======== */
 const pages = [
   {
-    title: "Capítulo 1: El Barco Sorpresa",
+    title: "Capítulo 1: O Barco Surpresa",
     image: "/images/stories/barco/cap-1.png",
-    text: `Una mañana, Coco encontró una carta junto a su cuenco de comida:
-“Querido Coco, ¡te invitamos a un viaje en barco!
-Firma: Capitán Pez”.
+    text: `Numa manhã, o Coco encontrou uma carta junto à sua tigela de comida:
+"Querido Coco, convidamos-te para uma viagem de barco!
+Assinado: Capitão Peixe".
 
-Coco ladró emocionado y corrió al muelle.
-Allí le esperaba un barquito pequeño con una bandera que decía:
-“Aventura comienza aquí”.`,
+O Coco latiu de alegria e correu até ao cais.
+Lá estava um barquinho com uma bandeira a dizer:
+"A aventura começa aqui".`,
   },
   {
-    title: "Capítulo 2: La ballena que cantaba",
+    title: "Capítulo 2: A baleia que cantava",
     image: "/images/stories/barco/cap-2.png",
-    text: `Navegando por el mar azul, Coco escuchó una melodía.
-—¿Quién canta tan bonito? —preguntó.
+    text: `A navegar pelo mar azul, o Coco ouviu uma melodia.
+— Quem canta tão bonito? — perguntou.
 
-¡Era una ballena!
-—Hola, Coco. ¿Puedes ayudarme a encontrar mi eco?
+Era uma baleia!
+— Olá, Coco. Podes ajudar-me a encontrar o meu eco?
 
-Coco ladró fuerte y la ballena sonrió al escucharlo rebotar.
-—¡Gracias! —dijo—. ¡Tu voz me hizo sonreír!`,
+O Coco latiu forte e a baleia sorriu ao ouvi-lo a ecoar.
+— Obrigada! — disse. — A tua voz deixou-me feliz!`,
   },
   {
-    title: "Capítulo 3: El pulpo enredado",
+    title: "Capítulo 3: O polvo enrolado",
     image: "/images/stories/barco/cap-3.png",
-    text: `Entre olas suaves, Coco vio burbujas y... ¡tentáculos!
-Un pulpo se había enredado con una red de pesca.
-—¡No puedo bailar! —se lamentó.
+    text: `Entre ondas suaves, o Coco viu bolhas e... tentáculos!
+Um polvo tinha ficado preso numa rede de pesca.
+— Não consigo dançar! — lamentou-se.
 
-Coco mordisqueó la red y la soltó.
-El pulpo giró sobre sí mismo feliz:
-—¡Eres un héroe con patas peludas!`,
+O Coco roeu a rede e libertou-o.
+O polvo deu uma pirueta de alegria:
+— És um herói de quatro patas!`,
   },
   {
-    title: "Capítulo 4: La tormenta traviesa",
+    title: "Capítulo 4: A tempestade traquina",
     image: "/images/stories/barco/cap-4.png",
-    text: `El cielo se volvió gris. ¡Rayos! ¡Truenos!
-Coco se escondió bajo una manta en el barco.
-Pero luego pensó:
-—¿Y si las olas también están asustadas?
+    text: `O céu ficou cinzento. Raios! Trovões!
+O Coco escondeu-se debaixo de uma manta no barco.
+Mas depois pensou:
+— E se as ondas também estiverem assustadas?
 
-Salió, miró al cielo y dijo:
-—¡Todo va a estar bien!
+Saiu, olhou para o céu e disse:
+— Vai correr tudo bem!
 
-Y la tormenta... se fue.`,
+E a tempestade... foi-se embora.`,
   },
   {
-    title: "Capítulo 5: El tesoro invisible",
+    title: "Capítulo 5: O tesouro invisível",
     image: "/images/stories/barco/cap-5.png",
-    text: `Una luz brilló en el agua. Coco siguió el reflejo...
-Pero al llegar, solo había una botella con un papel:
+    text: `Uma luz brilhou na água. O Coco seguiu o reflexo...
+Mas, ao chegar, só encontrou uma garrafa com um papel:
 
-“El tesoro más brillante es tener amigos y ser valiente”.
+"O tesouro mais brilhante é ter amigos e ser corajoso".
 
-Coco sonrió.
-—¡Este es el mejor viaje de mi vida!”`,
+O Coco sorriu.
+— Esta foi a melhor viagem da minha vida!`,
   },
 ]
 
+/* ======== Estado ======== */
 const currentPageIndex = ref(0)
 const currentPage = computed(() => pages[currentPageIndex.value])
+const paragraphs = computed(() =>
+  currentPage.value.text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean)
+)
 
-const nextPage = () => {
-  if (currentPageIndex.value < pages.length - 1) currentPageIndex.value++
+/* ======== Deslizar (pointer events) ======== */
+const frameEl = ref(null)
+const startX = ref(0)
+const startY = ref(0)
+const dragging = ref(false)
+const deltaX = ref(0)
+const deltaY = ref(0)
+const slideDir = ref(null) // 'left' | 'right' | null
+const slideClass = computed(() => (slideDir.value ? `slide-${slideDir.value}` : ''))
+
+const SWIPE_THRESHOLD = 60
+const MAX_ANGLE = 25
+
+function onPointerDown(e) {
+  dragging.value = true
+  startX.value = e.clientX
+  startY.value = e.clientY
+  deltaX.value = 0
+  deltaY.value = 0
+  frameEl.value?.setPointerCapture?.(e.pointerId)
 }
-const prevPage = () => {
-  if (currentPageIndex.value > 0) currentPageIndex.value--
+function onPointerMove(e) {
+  if (!dragging.value) return
+  deltaX.value = e.clientX - startX.value
+  deltaY.value = e.clientY - startY.value
+  const angle = Math.abs(Math.atan2(deltaY.value, deltaX.value) * 180 / Math.PI)
+  if (angle > 90 - MAX_ANGLE && angle < 90 + MAX_ANGLE) return
+}
+function onPointerUp() {
+  if (!dragging.value) return
+  const dx = deltaX.value
+  const dy = deltaY.value
+  dragging.value = false
+  slideDir.value = null
+
+  const angle = Math.abs(Math.atan2(dy, dx) * 180 / Math.PI)
+  const isHorizontal = angle < MAX_ANGLE || angle > 180 - MAX_ANGLE
+  if (!isHorizontal) return
+
+  if (dx <= -SWIPE_THRESHOLD) nextPage()
+  else if (dx >= SWIPE_THRESHOLD) prevPage()
+}
+function onPointerCancel() {
+  dragging.value = false
+  slideDir.value = null
+}
+
+function nextPage() {
+  if (currentPageIndex.value >= pages.length - 1) return
+  slideDir.value = 'left'
+  currentPageIndex.value++
+}
+function prevPage() {
+  if (currentPageIndex.value <= 0) return
+  slideDir.value = 'right'
+  currentPageIndex.value--
 }
 </script>
 
@@ -95,71 +158,44 @@ const prevPage = () => {
 .story-container {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 1rem;
+  padding: 1rem 1rem 2.25rem;
   border: 3px solid #a8c3e5;
   border-radius: 15px;
   background: #f7faff;
   box-shadow: 0 8px 20px rgba(50, 70, 120, 0.15);
+  touch-action: pan-y;
 }
 
 .story-content {
   display: flex;
   align-items: center;
   gap: 2rem;
+  transition: transform .25s ease, opacity .25s ease;
 }
 
-.story-image {
-  flex: 1;
-}
+.slide-left  { transform: translateX(-16px); opacity: .98; }
+.slide-right { transform: translateX( 16px); opacity: .98; }
 
+.story-image { flex: 1; }
 .story-image img {
   width: 100%;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(30, 60, 100, 0.2);
+  user-select: none;
 }
 
-.story-text {
-  flex: 1;
-  font-size: 1.2rem;
-  line-height: 1.6;
-}
+.story-text { flex: 1; font-size: 1.2rem; line-height: 1.6; }
+.story-text h2 { margin-bottom: 1rem; color: #486b9f; font-size: 1.8rem; }
 
-.story-text h2 {
-  margin-bottom: 1rem;
-  color: #486b9f;
-  font-size: 1.8rem;
-}
-
-.nav-buttons {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-}
-
-.nav-buttons button {
-  background: #c3d4f6;
-  border: 2px solid #6c88b0;
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s;
-  color: #2e3d5c;
-}
-
-.nav-buttons button:hover:not(:disabled) {
-  background: #a9c0ea;
-}
-
-.nav-buttons button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.swipe-hint {
+  text-align: center;
+  margin-top: 1rem;
+  color: #6c88b0;
+  font-size: .95rem;
+  user-select: none;
 }
 
 @media (max-width: 768px) {
-  .story-content {
-    flex-direction: column;
-    text-align: center;
-  }
+  .story-content { flex-direction: column; text-align: center; }
 }
 </style>

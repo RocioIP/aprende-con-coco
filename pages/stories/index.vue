@@ -1,21 +1,19 @@
 <template>
   <div>
     <div v-if="!cuentoSeleccionado" class="seleccion-cuentos">
-      <!-- <h1 class="titulo">Elige un cuento</h1> -->
       <div class="lista-cuentos">
         <div class="cuadro-cuento" @click="abrirCuento('cuento1')">
-          <img src="/images/stories/barco/portada.png" alt="Cuento Barco" />
-          <h2>El Barco encantado</h2>
+          <img src="/images/stories/barco/portada.png" alt="História do Barco" />
+          <h2>O Barco Encantado</h2>
         </div>
         <div class="cuadro-cuento" @click="abrirCuento('cuento2')">
-          <img src="/images/stories/luna/portada.png" alt="Cuento Luna" />
-          <h2>Coco y su viaje a la Luna</h2>
+          <img src="/images/stories/luna/portada.png" alt="História da Lua" />
+          <h2>Coco e a Sua Viagem à Lua</h2>
         </div>
         <!-- <div class="cuadro-cuento" @click="abrirCuento('cuento3')">
-          <img src="/images/stories/deportes/portada.png" alt="Cuento Luna" />
-          <h2>Coco se pone en forma</h2>
+          <img src="/images/stories/deportes/portada.png" alt="História Desportiva" />
+          <h2>Coco Fica em Forma</h2>
         </div> -->
-        <!-- Agregás más cuentos aquí si querés -->
       </div>
     </div>
 
@@ -24,7 +22,7 @@
       <CuentoDos v-if="cuentoSeleccionado === 'cuento2'" />
       <CuentoTres v-if="cuentoSeleccionado === 'cuento3'" />
       <button class="volver" @click="cuentoSeleccionado = null">
-        ← Volver
+        ← Voltar
       </button>
     </div>
   </div>
