@@ -20,9 +20,9 @@
       <div class="mascota-area">
         <img src="/images/blackboard/painter.png" alt="Mascota" class="mascota-img" />
         <div class="botones-mascota">
-          <button class="boton-mascota" @click="activarPizarraLibre">✏️ Pizarra libre</button>
-          <button class="boton-mascota" @click="juego = 'numeros'">Repasa os números</button>
-          <button class="boton-mascota" @click="juego = 'figuras'">Repasa as figuras</button>
+          <button class="boton-mascota" @click="activarPizarraLibre">✏️ 🎨</button>
+          <button class="boton-mascota" @click="juego = 'numeros'">1️⃣2️⃣3️⃣</button>
+          <button class="boton-mascota" @click="juego = 'figuras'">🟥⭐🟢</button>
         </div>
       </div>
 
@@ -257,7 +257,7 @@ onBeforeUnmount(() => {
 }
 .boton-mascota {
   padding: 0.5rem 1rem;
-  font-size: 1rem;
+  font-size: 2rem;
   border: none;
   background-color: #5c7080;
   color: white;
@@ -313,5 +313,8 @@ onBeforeUnmount(() => {
   .pizarra-borde {
     height: clamp(260px, 70dvh, 85dvh); /* más alto en móvil */
   }
+  .botones-mascota {
+  flex-direction: row;
+}
 }
 </style>
