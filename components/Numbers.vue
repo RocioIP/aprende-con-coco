@@ -25,7 +25,7 @@
     <div v-if="estado === 'finalizado'" class="final-overlay">
       <div class="final-card">
         <h2 class="final-title">Boa Eduardo! 🎉</h2>
-        <img src="/images/global/coco-aplaudiendo.png" alt="Coco aplaudindo" class="coco-img" />
+        <img src="/images/global/coco-aplaudiendo.webp" alt="Coco aplaudindo" class="coco-img" />
         <div class="final-buttons">
           <button class="btn-repetir" @click="reiniciarJuego">🎈 Mais uma!</button>
           <button class="btn-fechar" @click="irAJuegos">✖ Fechar</button>
@@ -239,7 +239,7 @@ function reiniciarJuego() {
   iniciarNumero();
 }
 function irAJuegos() {
-  router.push("/blackboard");
+  router.push("/");
 }
 
 function speakText(text) {

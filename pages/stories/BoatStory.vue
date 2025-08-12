@@ -30,7 +30,7 @@ import { ref, computed } from 'vue'
 const pages = [
   {
     title: "Capítulo 1: O Barco Surpresa",
-    image: "/images/stories/barco/cap-1.png",
+    image: "/images/stories/barco/cap-1.webp",
     text: `Numa manhã, o Coco encontrou uma carta junto à sua tigela de comida:
 "Querido Coco, convidamos-te para uma viagem de barco!
 Assinado: Capitão Peixe".
@@ -41,7 +41,7 @@ Lá estava um barquinho com uma bandeira a dizer:
   },
   {
     title: "Capítulo 2: A baleia que cantava",
-    image: "/images/stories/barco/cap-2.png",
+    image: "/images/stories/barco/cap-2.webp",
     text: `A navegar pelo mar azul, o Coco ouviu uma melodia.
 — Quem canta tão bonito? — perguntou.
 
@@ -53,7 +53,7 @@ O Coco latiu forte e a baleia sorriu ao ouvi-lo a ecoar.
   },
   {
     title: "Capítulo 3: O polvo enrolado",
-    image: "/images/stories/barco/cap-3.png",
+    image: "/images/stories/barco/cap-3.webp",
     text: `Entre ondas suaves, o Coco viu bolhas e... tentáculos!
 Um polvo tinha ficado preso numa rede de pesca.
 — Não consigo dançar! — lamentou-se.
@@ -64,7 +64,7 @@ O polvo deu uma pirueta de alegria:
   },
   {
     title: "Capítulo 4: A tempestade traquina",
-    image: "/images/stories/barco/cap-4.png",
+    image: "/images/stories/barco/cap-4.webp",
     text: `O céu ficou cinzento. Raios! Trovões!
 O Coco escondeu-se debaixo de uma manta no barco.
 Mas depois pensou:
@@ -77,7 +77,7 @@ E a tempestade... foi-se embora.`,
   },
   {
     title: "Capítulo 5: O tesouro invisível",
-    image: "/images/stories/barco/cap-5.png",
+    image: "/images/stories/barco/cap-5.webp",
     text: `Uma luz brilhou na água. O Coco seguiu o reflexo...
 Mas, ao chegar, só encontrou uma garrafa com um papel:
 

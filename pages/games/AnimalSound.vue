@@ -38,7 +38,7 @@
     <div v-if="hasWon" class="win-overlay">
       <div class="win-card">
         <h1 class="display-6 fw-bold text-center mb-3">¡Boa Eduardo! 🎉</h1>
-        <img src="/images/global/coco-aplaudiendo.png" alt="Coco aplaudiendo" class="img-coco-aplaudiendo">
+        <img src="/images/global/coco-aplaudiendo.webp" alt="Coco aplaudiendo" class="img-coco-aplaudiendo">
         <div class="d-flex gap-2 justify-content-center mt-4">
           <button class="btn-mais-uma" @click="resetGame">🎈 Mais uma!</button>
           <button class="btn-salir" @click="goToGames">✖ Fechar</button>
@@ -58,11 +58,11 @@ import confetti from 'canvas-confetti'
 const QUESTIONS_PER_ROUND = 5
 
 const ANIMALS = [
-  { name: 'León',   sound: '/sounds/animals/lion.mp3',    image: '/images/games/animals/lion.png' },
-  { name: 'Perro',  sound: '/sounds/animals/dog.mp3',     image: '/images/games/animals/dog.png' },
-  { name: 'Gato',   sound: '/sounds/animals/cat.mp3',     image: '/images/games/animals/cat.png' },
-  { name: 'Pato',   sound: '/sounds/animals/duck.mp3',    image: '/images/games/animals/duck.png' },
-  { name: 'Gallo',  sound: '/sounds/animals/rooster.mp3', image: '/images/games/animals/rooster.png' },
+  { name: 'León',   sound: '/sounds/animals/lion.mp3',    image: '/images/games/animals/lion.webp' },
+  { name: 'Perro',  sound: '/sounds/animals/dog.mp3',     image: '/images/games/animals/dog.webp' },
+  { name: 'Gato',   sound: '/sounds/animals/cat.mp3',     image: '/images/games/animals/cat.webp' },
+  { name: 'Pato',   sound: '/sounds/animals/duck.mp3',    image: '/images/games/animals/duck.webp' },
+  { name: 'Gallo',  sound: '/sounds/animals/rooster.mp3', image: '/images/games/animals/rooster.webp' },
 ]
 
 /* --------- Estado --------- */

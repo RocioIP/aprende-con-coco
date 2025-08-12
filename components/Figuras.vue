@@ -39,12 +39,12 @@ const dibujando = ref(false);
 const figuras = ["circulo", "cuadrado", "triangulo", "rectangulo", "estrella", "corazon"];
 
 const imagenes = {
-  circulo: "bola.png",
-  cuadrado: "conto.png",
-  triangulo: "montana.png",
-  rectangulo: "tv.png",
-  estrella: "estrella.png",
-  corazon: "corazon.png",
+  circulo: "bola.webp",
+  cuadrado: "conto.webp",
+  triangulo: "montana.webp",
+  rectangulo: "tv.webp",
+  estrella: "estrella.webp",
+  corazon: "corazon.webp",
 };
 
 const figuraActual = ref(0);

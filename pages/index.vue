@@ -11,7 +11,7 @@
     <!-- Imagen de Coco (¡ahora también habla!) -->
     <div class="mb-4">
       <img 
-        src="/images/global/coco-saludando.webp" 
+        src="/images/global/coco-saludando.jpg" 
         alt="Coco saludando" 
         class="img-fluid"
         style="width: 15rem; height: auto; cursor: pointer;" 

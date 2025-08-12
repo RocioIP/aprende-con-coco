@@ -46,7 +46,7 @@
       <div class="win-card">
         <h1 class="display-6 fw-bold text-center mb-3">¡Boa {{ childName }}! 🎉</h1>
         <img
-          src="/images/global/coco-aplaudiendo.png"
+          src="/images/global/coco-aplaudiendo.webp"
           alt="Coco aplaudiendo"
           class="img-coco-aplaudiendo"
         />

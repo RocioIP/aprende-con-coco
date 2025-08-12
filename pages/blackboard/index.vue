@@ -18,10 +18,10 @@
 
     <div class="contenido-central">
       <div class="mascota-area">
-        <img src="/images/blackboard/painter.png" alt="Mascota" class="mascota-img" />
+        <img src="/images/blackboard/painter.webp" alt="Mascota" class="mascota-img" />
         <div class="botones-mascota">
           <button class="boton-mascota" @click="activarPizarraLibre">✏️ 🎨</button>
-          <button class="boton-mascota" @click="juego = 'numeros'">1️⃣2️⃣3️⃣</button>
+          <button class="boton-mascota" @click="juego = 'numeros'">1 2 3</button>
           <button class="boton-mascota" @click="juego = 'figuras'">🟥⭐🟢</button>
         </div>
       </div>

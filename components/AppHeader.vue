@@ -2,7 +2,7 @@
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-0">
       <NuxtLink class="navbar-brand" to="/">
-        <img src="/public/images/global/logo.png" alt="Logo aprende con Coco" class="img-logo">
+        <img src="/public/images/global/logo.webp" alt="Logo aprende con Coco" class="img-logo">
       </NuxtLink>
 
       <button

@@ -3,15 +3,15 @@
     <div v-if="!cuentoSeleccionado" class="seleccion-cuentos">
       <div class="lista-cuentos">
         <div class="cuadro-cuento" @click="abrirCuento('cuento1')">
-          <img src="/images/stories/barco/portada.png" alt="História do Barco" />
+          <img src="/images/stories/barco/portada.webp" alt="História do Barco" />
           <h2>O Barco Encantado</h2>
         </div>
         <div class="cuadro-cuento" @click="abrirCuento('cuento2')">
-          <img src="/images/stories/luna/portada.png" alt="História da Lua" />
+          <img src="/images/stories/luna/portada.webp" alt="História da Lua" />
           <h2>Coco e a Sua Viagem à Lua</h2>
         </div>
         <!-- <div class="cuadro-cuento" @click="abrirCuento('cuento3')">
-          <img src="/images/stories/deportes/portada.png" alt="História Desportiva" />
+          <img src="/images/stories/deportes/portada.webp" alt="História Desportiva" />
           <h2>Coco Fica em Forma</h2>
         </div> -->
       </div>

@@ -6,21 +6,21 @@
       <!-- Tarjeta: Colores -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/balloons" class="card juego-card">
-          <img src="/images/games/balloons.png" alt="Juego de globos" class="card-img-top" />
+          <img src="/images/games/balloons.webp" alt="Juego de globos" class="card-img-top" />
         </NuxtLink>
       </div>
 
       <!-- Tarjeta: Letras -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/letters" class="card juego-card">
-          <img src="/images/games/letters.png" alt="Juego de letras" class="card-img-top" />
+          <img src="/images/games/letters.webp" alt="Juego de letras" class="card-img-top" />
         </NuxtLink>
       </div>
 
       <!-- Tarjeta: Números -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/animalsound" class="card juego-card">
-          <img src="/images/games/friends.png" alt="Juego de amigos" class="card-img-top" />
+          <img src="/images/games/friends.webp" alt="Juego de amigos" class="card-img-top" />
         </NuxtLink>
       </div>
     </div>
