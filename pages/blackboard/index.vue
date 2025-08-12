@@ -299,7 +299,7 @@ onBeforeUnmount(() => {
 }
 
 /* Móvil: la pizarra usa más alto y la mascota pasa arriba */
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .contenido-central {
     flex-direction: column;
     align-items: stretch;
@@ -308,6 +308,7 @@ onBeforeUnmount(() => {
   .mascota-area {
     max-width: 100%;
     align-items: center;
+    flex-direction: row;
   }
 
   .pizarra-borde {
