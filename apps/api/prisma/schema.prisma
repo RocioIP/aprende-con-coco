@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  parent
+  therapist
+  admin
+}
+
+enum Size {
+  grande
+  pequeno
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(parent)
+  createdAt     DateTime  @default(now())
+  children      Child[]
+}
+
+model Child {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  name       String
+  birthdate  DateTime?
+  settings   Json?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempts   Attempt[]
+
+  @@index([userId])
+}
+
+model Game {
+  id    Int     @id @default(autoincrement())
+  code  String  @unique   // p.ej. "color_balloons"
+  name  String
+}
+
+model Attempt {
+  id           Int       @id @default(autoincrement())
+  childId      Int
+  gameCode     String
+  level        Int
+  targetColor  String?
+  targetSize   Size?
+  targetLetter String?
+  result       Boolean
+  reactionMs   Int?
+  createdAt    DateTime  @default(now())
+
+  child        Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, gameCode, level])
+}
