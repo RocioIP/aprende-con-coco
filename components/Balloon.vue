@@ -2,7 +2,7 @@
   <div
     v-if="visible"
     class="balloon d-flex justify-content-center align-items-center"
-    :class="{ shake: isShaking }"
+    :class="[ sizeClass, { shake: isShaking } ]"
     @click="handleClick"
     @touchstart.stop.prevent="handleClick"
     :style="balloonStyle"
@@ -20,6 +20,8 @@ const props = defineProps({
   color: { type: String, required: true },
   letter: { type: String, required: true },
   targetColor: { type: String, required: true },
+  targetSize: { type: String, default: null }, // 'grande' | 'pequeno' | null (solo para nivel 2)
+  size: { type: String, default: 'grande' },   // 'grande' | 'pequeno'
 })
 
 const emit = defineEmits(['correct', 'wrong'])
@@ -29,44 +31,57 @@ const isShaking = ref(false)
 
 let popSound, errorSound
 
-// Medidas usadas en el CSS
-const BALLOON_W = 100
-const BALLOON_H = 120
+// Medidas base
+const BASE_W = 100
+const BASE_H = 120
 
 onMounted(() => {
   popSound = new Audio('/sounds/pop.mp3')
   errorSound = new Audio('/sounds/error.mp3')
 })
 
+const sizeClass = computed(() => (props.size === 'pequeno' ? 'small' : 'big'))
+
 const handleClick = () => {
-  if (props.color === props.targetColor) {
+  const isLevel2 = !!props.targetSize
+  const isRightColor = props.color === props.targetColor
+  const isRightSize = !isLevel2 || props.size === props.targetSize
+
+  if (isRightColor && isRightSize) {
     popSound?.play()
-    visible.value = false
-    const centerX = props.x + BALLOON_W / 2
-    const centerY = props.y + BALLOON_H / 2
-    emit('correct', { x: centerX, y: centerY })
+    const dims = getDims()
+    const centerX = props.x + dims.w / 2
+    const centerY = props.y + dims.h / 2
+    // No ocultamos aquí; dejamos que el padre gestione la eliminación
+    emit('correct', { x: centerX, y: centerY, color: props.color, size: props.size })
   } else {
     errorSound?.play()
     isShaking.value = true
     emit('wrong')
-    setTimeout(() => {
-      isShaking.value = false
-    }, 500)
+    setTimeout(() => { isShaking.value = false }, 500)
   }
 }
 
-const balloonStyle = computed(() => ({
-  top: props.y + 'px',
-  left: props.x + 'px',
-  backgroundColor: props.color,
-}))
+function getDims() {
+  if (props.size === 'pequeno') return { w: Math.round(BASE_W * 0.75), h: Math.round(BASE_H * 0.75) }
+  return { w: BASE_W, h: BASE_H }
+}
+
+const balloonStyle = computed(() => {
+  const { w, h } = getDims()
+  return {
+    top: props.y + 'px',
+    left: props.x + 'px',
+    width: w + 'px',
+    height: h + 'px',
+    backgroundColor: props.color,
+  }
+})
 </script>
 
 <style scoped>
 .balloon {
   position: absolute;
-  width: 100px;
-  height: 120px;
   border-radius: 50%;
   cursor: pointer;
   user-select: none;
@@ -81,7 +96,8 @@ const balloonStyle = computed(() => ({
 }
 
 .balloon-text {
-  line-height: 90px;
+  line-height: 90px; /* se ajusta visualmente; con height menor se centra por flex */
+  pointer-events: none;
 }
 
 .balloon::after {
@@ -109,9 +125,11 @@ const balloonStyle = computed(() => ({
   z-index: 2;
 }
 
-.shake {
-  animation: shake 0.3s;
-}
+/* Tamaños */
+.big { transform-origin: center bottom; }
+.small { transform-origin: center bottom; }
+
+.shake { animation: shake 0.3s; }
 
 @keyframes shake {
   0% { transform: translateX(0); }
