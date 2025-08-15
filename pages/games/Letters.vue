@@ -2,52 +2,37 @@
   <div class="container py-5 text-center position-relative">
     <!-- Pantalla de juego -->
     <div v-if="!hasWon">
-      <h2 class="mb-4 display-5 fw-bold">
-        Com qual é que se assemelha?
-      </h2>
+      <h2 class="mb-4 display-5 fw-bold">Com qual é que se assemelha?</h2>
 
       <!-- Letra objetivo -->
       <div class="target-letter mb-5 mx-auto">
         {{ currentLetter.letter }}
       </div>
 
-      <!-- Opciones (2) -->
+      <!-- Opciones: campanas -->
       <div class="row justify-content-center g-4">
         <div
           class="col-6 col-md-3"
-          v-for="(option, index) in currentLetter.options"
-          :key="index"
+          v-for="(option, idx) in currentLetter.options"
+          :key="idx"
         >
-          <button
-            class="option-button fs-1 w-100 py-4"
-            :class="{
-              'bg-success text-white': result === 'correct' && option === currentLetter.answer,
-              'bg-danger text-white': result === 'wrong' && option === selectedOption
-            }"
-            @click="checkAnswer(option)"
+          <Bell
+            :letter="option"
+            :state="optionState(option)"
             :disabled="isLocked"
-          >
-            {{ option }}
-          </button>
+            @choose="onChoose"
+          />
         </div>
-      </div>
-
-      <!-- Feedback -->
-      <div v-if="result" class="mt-4 fs-3 fw-bold" :class="{
-        'text-success': result === 'correct',
-        'text-danger': result === 'wrong'
-      }">
-        {{ result === 'correct' ? `🎉 Boa ${childName}!` : '😬 Não, tenta de novo' }}
       </div>
     </div>
 
-    <!-- Pantalla de victoria con tarjeta Coco -->
+    <!-- Pantalla de victoria -->
     <div v-else class="win-overlay">
       <div class="win-card">
-        <h1 class="display-6 fw-bold text-center mb-3">¡Boa {{ childName }}! 🎉</h1>
+        <h1 class="display-6 fw-bold text-center mb-3">🎉 Parabéns!</h1>
         <img
           src="/images/global/coco-aplaudiendo.webp"
-          alt="Coco aplaudiendo"
+          alt="Coco aplaudindo"
           class="img-coco-aplaudiendo"
         />
         <div class="d-flex gap-2 justify-content-center mt-4">
@@ -55,7 +40,6 @@
           <button class="btn-salir" @click="goToGames">✖ Fechar</button>
         </div>
       </div>
-      <canvas id="confetti-canvas" class="confetti-canvas" />
     </div>
   </div>
 </template>
@@ -64,17 +48,13 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import confetti from 'canvas-confetti'
+import Bell from '@/components/Bell.vue'
 
 const router = useRouter()
 
 const QUESTIONS_PER_ROUND = 5
 const OPTIONS_PER_QUESTION = 2
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-
-const props = defineProps({
-  childName: { type: String, default: 'Eduardo' }
-})
-const childName = ref(props.childName)
 
 const questions = ref(generateRound())
 const index = ref(0)
@@ -89,8 +69,12 @@ let audioCorrect = null
 let audioWrong = null
 
 onMounted(() => {
-  audioCorrect = new Audio('/audio/boa.mp3')
-  audioWrong = new Audio('/audio/ups.mp3')
+  audioCorrect = new Audio('/sounds/dingdong.mp3')
+  audioWrong   = new Audio('/sounds/error.mp3')
+  audioCorrect.load()
+  audioWrong.load()
+
+  // Hablar al inicio
   speak('Com qual é que se assemelha?')
 })
 
@@ -110,7 +94,11 @@ function generateRound () {
   )
 }
 
-async function checkAnswer(option) {
+function onChoose({ letter, center }) {
+  checkAnswer(letter, center)
+}
+
+async function checkAnswer(option, center) {
   if (isLocked.value) return
   selectedOption.value = option
   const last = index.value === questions.value.length - 1
@@ -119,28 +107,55 @@ async function checkAnswer(option) {
     result.value = 'correct'
     isLocked.value = true
 
+    // Confeti en la campana acertada
+    burstConfettiAt(center)
+    await playSound('correct')
+
     if (last) {
       await nextTick()
       showWinScreen()
     } else {
-      await playFeedback({ type: 'correct', text: `Boa ${childName.value}!` })
       index.value++
+      // Repite la pregunta en la siguiente ronda
+      speak('Com qual é que se assemelha?')
     }
   } else {
     result.value = 'wrong'
     isLocked.value = true
-    await playFeedback({ type: 'wrong', text: 'Não, tenta de novo' })
+    await playSound('wrong')
     result.value = null
     isLocked.value = false
   }
 }
 
+function optionState(option) {
+  if (!result.value) return null
+  if (result.value === 'correct' && option === currentLetter.value.answer) return 'correct'
+  return null
+}
+
+function burstConfettiAt(center) {
+  const nx = center ? center.x / window.innerWidth  : 0.5
+  const ny = center ? center.y / window.innerHeight : 0.5
+  confetti({
+    particleCount: 140,
+    spread: 75,
+    startVelocity: 40,
+    gravity: 0.9,
+    origin: { x: nx, y: ny }
+  })
+}
+
 function showWinScreen() {
   hasWon.value = true
-  nextTick(() => {
-    launchConfetti()
-    playFeedback({ type: 'correct', text: `Boa ${childName.value}!` })
+  confetti({
+    particleCount: 200,
+    spread: 100,
+    startVelocity: 45,
+    gravity: 0.9,
+    origin: { x: 0.5, y: 0.5 }
   })
+  playSound('correct')
 }
 
 function resetGame() {
@@ -150,6 +165,8 @@ function resetGame() {
   result.value = null
   selectedOption.value = null
   isLocked.value = false
+
+  // Volver a decir la frase
   speak('Com qual é que se assemelha?')
 }
 
@@ -157,41 +174,25 @@ function goToGames() {
   router.push('/games')
 }
 
-function playFeedback({ type, text }) {
+function playSound(type) {
   return new Promise(resolve => {
     const audioObj = type === 'correct' ? audioCorrect : audioWrong
     if (audioObj) {
       audioObj.currentTime = 0
       audioObj.onended = resolve
-      audioObj.play().catch(() => {
-        speak(text, resolve)
-      })
+      audioObj.play().catch(resolve)
     } else {
-      speak(text, resolve)
+      resolve()
     }
   })
 }
 
 function speak(text, cb) {
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'pt-PT'
-  if (cb) u.onend = cb
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = 'pt-PT'
+  if (cb) utterance.onend = cb
   speechSynthesis.cancel()
-  speechSynthesis.speak(u)
-}
-
-function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas')
-  if (canvas) {
-    const myConfetti = confetti.create(canvas, { resize: true, useWorker: true })
-    myConfetti({
-      particleCount: 180,
-      spread: 90,
-      startVelocity: 45,
-      gravity: 0.9,
-      origin: { x: 0.5, y: 0.5 }
-    })
-  }
+  speechSynthesis.speak(utterance)
 }
 
 function shuffle(arr) {
@@ -216,6 +217,7 @@ function sampleUnique(pool, n) {
 }
 </script>
 
+
 <style scoped>
 .target-letter {
   font-size: 6rem;
@@ -228,18 +230,6 @@ function sampleUnique(pool, n) {
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   user-select: none;
-}
-
-.option-button {
-  font-size: 3rem;
-  border: 4px solid #ccc;
-  border-radius: 20px;
-  background: #f8f9fa;
-  transition: all 0.2s ease;
-}
-.option-button:hover:not(:disabled) {
-  background: #eef5ff;
-  border-color: #0d6efd;
 }
 
 .win-overlay {
@@ -261,15 +251,6 @@ function sampleUnique(pool, n) {
   text-align: center;
   max-width: 420px;
   width: calc(100% - 2rem);
-}
-
-.confetti-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: -1;
 }
 
 .img-coco-aplaudiendo {
