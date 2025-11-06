@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted, nextTick, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import Balloon from "@/components/Balloon.vue";
+import Balloon from "@/components/atoms/Balloon.vue";
 import confetti from "canvas-confetti";
 
 const router = useRouter();

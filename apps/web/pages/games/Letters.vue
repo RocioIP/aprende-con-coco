@@ -48,7 +48,7 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import confetti from 'canvas-confetti'
-import Bell from '@/components/Bell.vue'
+import Bell from '@/components/atoms/Bell.vue'
 
 const router = useRouter()
 

@@ -53,8 +53,8 @@
 
 <script setup>
 import { ref, onMounted, nextTick, watch, onBeforeUnmount } from "vue";
-import numbers from "@/components/Numbers.vue";
-import figuras from "@/components/Figuras.vue";
+import numbers from "@/components/organisms/Numbers.vue";
+import figuras from "@/components/organisms/Figuras.vue";
 
 const canvas = ref(null);
 const ctx = ref(null);

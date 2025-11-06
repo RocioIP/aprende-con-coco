@@ -23,6 +23,13 @@
           <img src="/images/games/friends.webp" alt="Juego de amigos" class="card-img-top" />
         </NuxtLink>
       </div>
+
+      <!-- Tarjeta: Números (Cartas) -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <NuxtLink to="/games/numbers-cards" class="card juego-card">
+          <img src="/images/games/numbers.webp" alt="Juego de números" class="card-img-top" />
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
