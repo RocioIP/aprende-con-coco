@@ -282,10 +282,9 @@ function goToGames() {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  justify-items: center; /* centra cada carta con ancho fijo */
+  justify-items: center;
   gap: 24px;
   max-width: 1280px;
-  /* más espacio por arriba y por abajo */
   margin: 24px auto 36px;
 }
 
