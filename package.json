@@ -1,5 +1,9 @@
 {
   "name": "aprende-con-coco",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "cd apps/web && npm run build"
+  }
+
 }
