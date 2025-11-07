@@ -268,7 +268,7 @@ function goToGames() {
 <style scoped>
 .target-number {
   font-size: clamp(3rem, 8vw, 6rem);
-  color: #0d6efd; /* azul del número */
+  color: #0d6efd;
   background: #EAF3FF; /* azul clarito de fondo */
   padding: 0.1em 0.35em; /* proporcional al tamaño */
   border-radius: 0.25em;
