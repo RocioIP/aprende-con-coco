@@ -5,5 +5,4 @@
   "scripts": {
     "build": "cd apps/web && npm run build"
   }
-
 }
