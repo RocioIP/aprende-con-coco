@@ -157,7 +157,7 @@ function patternStyle(card){
 onMounted(() => {
   if (import.meta.client) {
     errorSound = new Audio('/sounds/error.mp3')
-    successSound = new Audio('/sounds/dingdong.mp3')
+    successSound = new Audio('/sounds/true.mp3')
   }
   startRound()
   // Intento inicial de hablar; si el navegador bloquea, se podrá con el primer toque
@@ -179,7 +179,7 @@ watch(
           startRound()
           askForTarget()
         }
-      }, 700)
+      }, 1000)
     }
   }
 )
@@ -188,14 +188,13 @@ function onCardClick(card) {
   if (card.flipped) return
   if (card.value === targetNumber.value) {
     card.flipped = true
-    speakPt('Boa!')
     try { successSound && successSound.play() } catch {}
     const remaining = cards.value.filter(c => !c.flipped)
     if (remaining.length > 0) {
       setTimeout(() => {
         pickNextTarget()
         askForTarget()
-      }, 700)
+      }, 1000)
     }
   } else {
     card.shake = true
@@ -285,7 +284,7 @@ function goToGames() {
   justify-items: center;
   gap: 24px;
   max-width: 1280px;
-  margin: 24px auto 36px;
+  margin: 2rem;
 }
 
 @media (max-width: 1024px) {
