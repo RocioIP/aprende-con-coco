@@ -179,7 +179,7 @@ watch(
           startRound()
           askForTarget()
         }
-      }, 1000)
+      }, 2000)
     }
   }
 )
@@ -194,7 +194,7 @@ function onCardClick(card) {
       setTimeout(() => {
         pickNextTarget()
         askForTarget()
-      }, 1000)
+      }, 3000)
     }
   } else {
     card.shake = true
