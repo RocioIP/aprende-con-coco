@@ -76,8 +76,8 @@ function handleClick () {
 <style scoped>
 .bell-option {
   position: relative;
-  width: 140px;
-  height: 160px;
+  width: 176px;
+  height: 200px;
   margin-inline: auto;
   cursor: pointer;
   user-select: none;
@@ -102,7 +102,7 @@ function handleClick () {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 3.25rem;
+  font-size: 4rem;
   font-weight: 800;
   color: #3b2d06; /* contraste sobre dorado */
   text-shadow: 0 2px 6px rgba(255, 255, 255, .35);
