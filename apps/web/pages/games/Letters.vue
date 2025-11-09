@@ -1,8 +1,8 @@
-<template>
+﻿<template>
   <div class="container py-5 text-center position-relative">
     <!-- Pantalla de juego -->
     <div v-if="!hasWon">
-      <h2 class="mb-4 display-5 fw-bold">Com qual é que se assemelha?</h2>
+      <h2 class="mb-4 display-5 fw-bold">{{ promptText }}</h2>
 
       <!-- Letra objetivo -->
       <div class="target-letter mb-5 mx-auto">
@@ -29,15 +29,15 @@
     <!-- Pantalla de victoria -->
     <div v-else class="win-overlay">
       <div class="win-card">
-        <h1 class="display-6 fw-bold text-center mb-3">🎉 Parabéns!</h1>
+        <h1 class="display-6 fw-bold text-center mb-3">ðŸŽ‰ ParabÃ©ns!</h1>
         <img
           src="/images/global/coco-aplaudiendo.webp"
           alt="Coco aplaudindo"
           class="img-coco-aplaudiendo"
         />
         <div class="d-flex gap-2 justify-content-center mt-4">
-          <button class="btn-mais-uma" @click="resetGame">🎈 Mais uma!</button>
-          <button class="btn-salir" @click="goToGames">✖ Fechar</button>
+          <button class="btn-mais-uma" @click="resetGame">ðŸŽˆ Mais uma!</button>
+          <button class="btn-salir" @click="goToGames">âœ– Fechar</button>
         </div>
       </div>
     </div>
@@ -54,6 +54,7 @@ const router = useRouter()
 
 const QUESTIONS_PER_ROUND = 5
 const OPTIONS_PER_QUESTION = 2
+const QUESTION_PAUSE_MS = 500
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
 const questions = ref(generateRound())
@@ -64,6 +65,7 @@ const isLocked = ref(false)
 const hasWon = ref(false)
 
 const currentLetter = computed(() => questions.value[index.value])
+const promptText = computed(() => `Esta é a letra ${currentLetter.value.letter}. A qual é que se assemelha?`)
 
 let audioCorrect = null
 let audioWrong = null
@@ -74,8 +76,8 @@ onMounted(() => {
   audioCorrect.load()
   audioWrong.load()
 
-  // Hablar al inicio
-  speak('Com qual é que se assemelha?')
+  // Falar ao inÃ­cio (duas partes com pausa)
+  speakPrompt()
 })
 
 watch(index, () => {
@@ -116,8 +118,8 @@ async function checkAnswer(option, center) {
       showWinScreen()
     } else {
       index.value++
-      // Repite la pregunta en la siguiente ronda
-      speak('Com qual é que se assemelha?')
+      // Repetir a pergunta na prÃ³xima ronda (duas partes)
+      speakPrompt()
     }
   } else {
     result.value = 'wrong'
@@ -166,8 +168,8 @@ function resetGame() {
   selectedOption.value = null
   isLocked.value = false
 
-  // Volver a decir la frase
-  speak('Com qual é que se assemelha?')
+  // Voltar a dizer a frase (duas partes)
+  speakPrompt()
 }
 
 function goToGames() {
@@ -193,6 +195,13 @@ function speak(text, cb) {
   if (cb) utterance.onend = cb
   speechSynthesis.cancel()
   speechSynthesis.speak(utterance)
+}
+
+function speakPrompt() {
+  const letter = currentLetter.value.letter
+  const first = `Esta é a letra ${letter}`
+  const second = 'A qual é que se assemelha?'
+  speak(first, () => setTimeout(() => speak(second), QUESTION_PAUSE_MS))
 }
 
 function shuffle(arr) {
