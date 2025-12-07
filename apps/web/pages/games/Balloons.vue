@@ -7,28 +7,28 @@
           :class="{ active: level === 1 }"
           @click="switchLevel(1)"
         >
-          Nível 1
+          {{ t('games.balloons.levelOne') }}
         </button>
         <button
           class="lvl-btn"
           :class="{ active: level === 2 }"
           @click="switchLevel(2)"
         >
-          Nível 2
+          {{ t('games.balloons.levelTwo') }}
         </button>
       </div>
     </div>
 
     <h3 v-if="!hasWon" class="display-6 fw-bold text-center mt-3">
-      Toca no balão
+      {{ t('games.balloons.instruction') }}
       <span
         v-if="targetColor"
         :style="{ color: targetColor, fontWeight: 'bold' }"
       >
-        {{ targetColorName }}
+        {{ targetColorLabel }}
       </span>
       <span v-if="level === 2 && targetSize" class="badge-size">
-        {{ targetSize }}
+        {{ targetSizeLabel }}
       </span>
     </h3>
 
@@ -50,15 +50,21 @@
 
     <div v-if="hasWon" class="win-overlay">
       <div class="win-card">
-        <h1 class="display-6 fw-bold text-center mb-3">🎉 Parabéns!</h1>
+        <h1 class="display-6 fw-bold text-center mb-3">
+          🎉 {{ t('common.messages.congrats') }}
+        </h1>
         <img
           src="/images/global/coco-aplaudiendo.webp"
           alt="Coco aplaudindo"
           class="img-coco-aplaudiendo"
         />
         <div class="d-flex gap-2 justify-content-center mt-4">
-          <button class="btn-mais-uma" @click="resetGame">🎈 Mais uma!</button>
-          <button class="btn-salir" @click="goToGames">✖ Fechar</button>
+          <button class="btn-mais-uma" @click="resetGame">
+            🎈 {{ t('common.buttons.playAgain') }}
+          </button>
+          <button class="btn-salir" @click="goToGames">
+            ✖ {{ t('common.buttons.close') }}
+          </button>
         </div>
       </div>
       <canvas id="confetti-canvas" class="confetti-canvas" />
@@ -66,115 +72,144 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, nextTick, computed, watch } from "vue";
-import { useRouter } from "vue-router";
-import Balloon from "@/components/atoms/Balloon.vue";
-import confetti from "canvas-confetti";
+<script setup lang="ts">
+import { ref, onMounted, nextTick, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import confetti from 'canvas-confetti'
+import Balloon from '@/components/atoms/Balloon.vue'
+import { speechVoices } from '@/lang'
 
-const router = useRouter();
+const router = useRouter()
+const { t, locale } = useI18n()
+const voice = computed(() => speechVoices[locale.value] ?? speechVoices.es)
 
-/* ====== CONFIG ====== */
-const vowels = ["A", "E", "I", "O", "U"];
+const vowels = ['A', 'E', 'I', 'O', 'U'] as const
 const colorByVowel = {
-  A: "#FF6B6B", // vermelho
-  E: "#FFD93D", // amarelo
-  I: "#4D96FF", // azul
-  O: "#6BCB77", // verde  (¡ojo al hex correcto!)
-  U: "#FF8000", // laranja
-};
-const colorNames = {
-  "#FF6B6B": "vermelho",
-  "#FFD93D": "amarelo",
-  "#4D96FF": "azul",
-  "#6BCB77": "verde",
-  "#FF8000": "laranja",
-};
+  A: '#FF6B6B',
+  E: '#FFD93D',
+  I: '#4D96FF',
+  O: '#6BCB77',
+  U: '#FF8000',
+} as const
+type ColorHex = typeof colorByVowel[keyof typeof colorByVowel]
+type ColorNameKey = 'red' | 'yellow' | 'blue' | 'green' | 'orange'
+const colorKeyByHex: Record<ColorHex, ColorNameKey> = {
+  '#FF6B6B': 'red',
+  '#FFD93D': 'yellow',
+  '#4D96FF': 'blue',
+  '#6BCB77': 'green',
+  '#FF8000': 'orange',
+}
 
-const LEVEL2_SIZES = ["grande", "pequeno"];
+const LEVEL2_SIZES = ['grande', 'pequeno'] as const
+type BalloonSize = (typeof LEVEL2_SIZES)[number]
+const sizeKeyMap: Record<BalloonSize, 'large' | 'small'> = {
+  grande: 'large',
+  pequeno: 'small',
+}
 
-/* ====== STATE ====== */
-const level = ref(1); // 1 o 2
-const balloons = ref([]);
-const targetColor = ref("");
-const targetColorName = ref(""); // 👈 nombre del color mostrado y hablado
-const targetSize = ref(null); // 'grande' | 'pequeno' (solo nivel 2)
-const usedColors = ref([]); // nivel 1
-const removedColors = ref([]); // nivel 2 (pares removidos)
-const hasWon = ref(false);
+interface BalloonItem {
+  id: string
+  letter: (typeof vowels)[number]
+  color: ColorHex
+  x: number
+  y: number
+  size: BalloonSize
+}
 
-const containerEl = ref(null);
-const boardEl = ref(null);
+const level = ref<1 | 2>(1)
+const balloons = ref<BalloonItem[]>([])
+const targetColor = ref<ColorHex | ''>('')
+const targetSize = ref<BalloonSize | null>(null)
+const usedColors = ref<ColorHex[]>([])
+const removedColors = ref<ColorHex[]>([])
+const hasWon = ref(false)
 
-let errorSound;
+const containerEl = ref<HTMLDivElement | null>(null)
+const boardEl = ref<HTMLDivElement | null>(null)
+let errorSound: HTMLAudioElement | null = null
 
-/* ====== MOUNT ====== */
+const targetColorLabel = computed(() =>
+  targetColor.value ? colorLabel(targetColor.value) : ''
+)
+const targetSizeLabel = computed(() =>
+  targetSize.value
+    ? t(`games.balloons.sizes.${sizeKeyMap[targetSize.value]}`)
+    : ''
+)
+
+function colorLabel(hex: ColorHex | '') {
+  if (!hex) return ''
+  const key = colorKeyByHex[hex as ColorHex]
+  return key ? t(`games.balloons.colors.${key}`) : ''
+}
+
 onMounted(() => {
-  errorSound = new Audio("/sounds/error.mp3");
-  initGame();
-});
+  errorSound = new Audio('/sounds/error.mp3')
+  initGame()
+})
 
 watch(level, () => {
-  // al cambiar de nivel reiniciamos
-  resetGame();
-});
+  resetGame()
+})
 
-/* ====== INIT & ROUND ====== */
 function initGame() {
-  balloons.value = [];
-  hasWon.value = false;
-  usedColors.value = [];
-  removedColors.value = [];
-  targetColor.value = "";
-  targetColorName.value = "";
-  targetSize.value = null;
-
-  placeBalloons();
+  balloons.value = []
+  hasWon.value = false
+  usedColors.value = []
+  removedColors.value = []
+  targetColor.value = ''
+  targetSize.value = null
+  placeBalloons()
   requestAnimationFrame(() => {
-    containerEl.value?.scrollTo({ top: 0, behavior: "instant" });
-  });
-  pickNextTarget();
+    containerEl.value?.scrollTo({ top: 0, behavior: 'auto' })
+  })
+  pickNextTarget()
 }
 
 function placeBalloons() {
-  const margin = 12;
-  const boardRect = boardEl.value?.getBoundingClientRect();
-  const boardW = boardRect?.width || Math.min(window.innerWidth, 900);
-  const boardH = 900;
+  const margin = 12
+  const boardRect = boardEl.value?.getBoundingClientRect()
+  const boardW = boardRect?.width || Math.min(window.innerWidth, 900)
+  const boardH = 900
 
-  const CLUSTER_PADDING_TOP = 80;
-  const CLUSTER_HEIGHT = 520;
-  const CLUSTER_WIDTH_RATIO = 0.85;
+  const CLUSTER_PADDING_TOP = 80
+  const CLUSTER_HEIGHT = 520
+  const CLUSTER_WIDTH_RATIO = 0.85
 
-  const clusterW = boardW * CLUSTER_WIDTH_RATIO;
-  const clusterH = Math.min(CLUSTER_HEIGHT, boardH - CLUSTER_PADDING_TOP - 40);
-  const clusterX0 = (boardW - clusterW) / 2;
-  const clusterY0 = CLUSTER_PADDING_TOP;
+  const clusterW = boardW * CLUSTER_WIDTH_RATIO
+  const clusterH = Math.min(CLUSTER_HEIGHT, boardH - CLUSTER_PADDING_TOP - 40)
+  const clusterX0 = (boardW - clusterW) / 2
+  const clusterY0 = CLUSTER_PADDING_TOP
 
-  const positions = [];
-  const isOverlapping = (x, y, w, h) =>
+  const positions: Array<{ x: number; y: number; w: number; h: number }> = []
+
+  const isOverlapping = (x: number, y: number, w: number, h: number) =>
     positions.some(
       (pos) =>
         Math.abs(pos.x - x) < (pos.w + w) / 2 + margin &&
         Math.abs(pos.y - y) < (pos.h + h) / 2 + margin
-    );
+    )
 
-  const dims = (size) =>
-    size === "pequeno" ? { w: 75, h: 90 } : { w: 100, h: 120 };
+  const dims = (size: BalloonSize) =>
+    size === 'pequeno' ? { w: 75, h: 90 } : { w: 100, h: 120 }
+
+  balloons.value = []
 
   if (level.value === 1) {
     vowels.forEach((letter, idx) => {
-      const size = "grande";
-      const { w, h } = dims(size);
-      let x,
-        y,
-        tries = 0;
+      const size: BalloonSize = 'grande'
+      const { w, h } = dims(size)
+      let x: number
+      let y: number
+      let tries = 0
       do {
-        x = Math.random() * (clusterW - w) + clusterX0;
-        y = Math.random() * (clusterH - h) + clusterY0;
-        tries++;
-      } while (isOverlapping(x, y, w, h) && tries < 200);
-      positions.push({ x, y, w, h });
+        x = Math.random() * (clusterW - w) + clusterX0
+        y = Math.random() * (clusterH - h) + clusterY0
+        tries++
+      } while (isOverlapping(x, y, w, h) && tries < 200)
+      positions.push({ x, y, w, h })
       balloons.value.push({
         id: `L1-${idx}`,
         letter,
@@ -182,23 +217,22 @@ function placeBalloons() {
         x,
         y,
         size,
-      });
-    });
+      })
+    })
   } else {
-    // 10 globos: 5 cores × {grande, pequeno}
-    let idc = 0;
+    let idc = 0
     vowels.forEach((letter) => {
       LEVEL2_SIZES.forEach((size) => {
-        const { w, h } = dims(size);
-        let x,
-          y,
-          tries = 0;
+        const { w, h } = dims(size)
+        let x: number
+        let y: number
+        let tries = 0
         do {
-          x = Math.random() * (clusterW - w) + clusterX0;
-          y = Math.random() * (clusterH - h) + clusterY0;
-          tries++;
-        } while (isOverlapping(x, y, w, h) && tries < 300);
-        positions.push({ x, y, w, h });
+          x = Math.random() * (clusterW - w) + clusterX0
+          y = Math.random() * (clusterH - h) + clusterY0
+          tries++
+        } while (isOverlapping(x, y, w, h) && tries < 300)
+        positions.push({ x, y, w, h })
         balloons.value.push({
           id: `L2-${idc++}`,
           letter,
@@ -206,101 +240,115 @@ function placeBalloons() {
           x,
           y,
           size,
-        });
-      });
-    });
+        })
+      })
+    })
   }
 }
 
-/* ====== OBJETIVO ====== */
 const pickNextTarget = async () => {
   if (level.value === 1) {
     const remainingColors = balloons.value
       .map((b) => b.color)
-      .filter((c) => !usedColors.value.includes(c));
-    if (remainingColors.length > 0) {
-      const next =
-        remainingColors[Math.floor(Math.random() * remainingColors.length)];
-      targetColor.value = next;
-      targetColorName.value = colorNames[next] || "";
-      targetSize.value = null;
-      speakText(`Toca no balão colorido ${targetColorName.value}`);
-    } else {
-      await win();
+      .filter((color) => !usedColors.value.includes(color))
+    if (remainingColors.length === 0) {
+      await win()
+      return
     }
+    const next =
+      remainingColors[Math.floor(Math.random() * remainingColors.length)]
+    targetColor.value = next
+    targetSize.value = null
+    speakInstruction()
   } else {
-    // Nivel 2: elegir (color, tamaño) entre los aún presentes (y no eliminados por par)
     const remaining = balloons.value.filter(
       (b) => !removedColors.value.includes(b.color)
-    );
+    )
     if (remaining.length === 0) {
-      await win();
-      return;
+      await win()
+      return
     }
     const pick = remaining[Math.floor(Math.random() * remaining.length)]
-targetColor.value = pick.color
-targetColorName.value = colorNames[pick.color] || ''
-targetSize.value = pick.size
-speakText(`Toca no balão ${targetColorName.value} ${targetSize.value}`)
+    targetColor.value = pick.color
+    targetSize.value = pick.size
+    speakInstruction()
   }
-};
+}
 
 async function win() {
-  hasWon.value = true;
-  await nextTick();
-  launchConfetti();
-  speakText("Parabéns!");
+  hasWon.value = true
+  await nextTick()
+  launchConfetti()
+  speakText(t('common.messages.congrats'))
 }
 
-/* ====== HANDLERS ====== */
-function switchLevel(lvl) {
-  if (level.value === lvl) return;
-  level.value = lvl;
+function switchLevel(lvl: 1 | 2) {
+  if (level.value === lvl) return
+  level.value = lvl
 }
 
-const handleCorrect = (color, size, centerX, centerY) => {
-  popConfettiAt(centerX, centerY);
+const handleCorrect = (color: ColorHex, _size: BalloonSize, centerX: number, centerY: number) => {
+  popConfettiAt(centerX, centerY)
+
+  balloons.value = balloons.value.filter((b) => b.color !== color)
 
   if (level.value === 1) {
-    balloons.value = balloons.value.filter((b) => b.color !== color);
-    usedColors.value.push(color);
+    if (!usedColors.value.includes(color)) usedColors.value.push(color)
   } else {
-    // Nivel 2: eliminar los DOS globos del mismo color
-    balloons.value = balloons.value.filter((b) => b.color !== color);
-    if (!removedColors.value.includes(color)) removedColors.value.push(color);
+    if (!removedColors.value.includes(color)) removedColors.value.push(color)
   }
 
-  pickNextTarget();
-};
-
-const handleWrong = () => {
-  errorSound.currentTime = 0;
-  errorSound.play();
-};
-
-/* ====== VOZ ====== */
-function speakText(text) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-PT";
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  pickNextTarget()
 }
 
-/* ====== CONFETTI ====== */
+const handleWrong = () => {
+  if (!errorSound) return
+  errorSound.currentTime = 0
+  errorSound.play()
+}
+
+function speakInstruction() {
+  if (!targetColor.value) return
+  if (level.value === 1) {
+    const text = t('games.balloons.speakColor', {
+      color: targetColorLabel.value,
+    })
+    speakText(text)
+  } else if (targetSize.value) {
+    const text = t('games.balloons.speakColorSize', {
+      color: targetColorLabel.value,
+      size: targetSizeLabel.value,
+    })
+    speakText(text)
+  }
+}
+
+function speakText(text: string) {
+  if (!import.meta.client) return
+  const trimmed = text?.trim()
+  if (!trimmed) return
+  const u = new SpeechSynthesisUtterance(trimmed)
+  u.lang = voice.value
+  speechSynthesis.cancel()
+  speechSynthesis.speak(u)
+}
+
 function launchConfetti() {
-  const canvas = document.getElementById("confetti-canvas");
+  const canvas = document.getElementById('confetti-canvas') as
+    | HTMLCanvasElement
+    | null
   if (canvas) {
     const myConfetti = confetti.create(canvas, {
       resize: true,
       useWorker: true,
-    });
+    })
     myConfetti({
       particleCount: 220,
       spread: 100,
       startVelocity: 45,
       gravity: 0.9,
       origin: { x: 0.5, y: 0.5 },
-    });
+    })
   } else {
     confetti({
       particleCount: 220,
@@ -308,17 +356,17 @@ function launchConfetti() {
       startVelocity: 45,
       gravity: 0.9,
       origin: { x: 0.5, y: 0.5 },
-    });
+    })
   }
 }
 
-function popConfettiAt(centerX, centerY) {
-  const rect = boardEl.value?.getBoundingClientRect();
-  if (!rect) return;
-  const clientX = rect.left + centerX;
-  const clientY = rect.top + centerY;
-  const originX = clientX / window.innerWidth;
-  const originY = clientY / window.innerHeight;
+function popConfettiAt(centerX: number, centerY: number) {
+  const rect = boardEl.value?.getBoundingClientRect()
+  if (!rect) return
+  const clientX = rect.left + centerX
+  const clientY = rect.top + centerY
+  const originX = clientX / window.innerWidth
+  const originY = clientY / window.innerHeight
 
   confetti({
     particleCount: 70,
@@ -327,25 +375,23 @@ function popConfettiAt(centerX, centerY) {
     gravity: 0.9,
     ticks: 120,
     origin: { x: originX, y: originY },
-  });
+  })
 }
 
-/* ====== RESET / NAV ====== */
 async function resetGame(speak = true) {
-  hasWon.value = false;
-  usedColors.value = [];
-  removedColors.value = [];
-  targetColor.value = "";
-  targetColorName.value = "";
-  targetSize.value = null;
-  balloons.value = [];
-  await nextTick();
-  placeBalloons();
-  if (speak) pickNextTarget();
+  hasWon.value = false
+  usedColors.value = []
+  removedColors.value = []
+  targetColor.value = ''
+  targetSize.value = null
+  balloons.value = []
+  await nextTick()
+  placeBalloons()
+  if (speak) pickNextTarget()
 }
 
 function goToGames() {
-  router.push("/games");
+  router.push('/games')
 }
 </script>
 

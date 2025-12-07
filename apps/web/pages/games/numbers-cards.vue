@@ -1,8 +1,8 @@
 <template>
   <div class="container pt-2 pb-3 text-center">
     <h2 class="display-6 fw-bold mb-1">
-      Onde está o número
-      <span class="target-number">{{ targetNumber }}</span>?
+      {{ t('games.numbersCards.titleBeforeNumber') }}
+      <span class="target-number">{{ targetNumber }}</span>{{ t('games.numbersCards.titleAfterNumber') }}
     </h2>
 
     <div class="cards-grid" @click.once="unlockAudioOnce">
@@ -26,7 +26,7 @@
               alt="Coco aplaudindo"
               class="coco-img"
             />
-            <div class="boa">Boa!</div>
+            <div class="boa">{{ t('common.messages.good') }}</div>
           </div>
         </div>
       </div>
@@ -34,28 +34,30 @@
 
     <div class="controls mt-3">
       <button class="btn btn-outline-primary btn-lg rounded-pill" @click="repeatQuestion">
-        🔊 Repetir
+        🔊 {{ t('common.buttons.repeat') }}
       </button>
-      <button class="btn btn-light btn-lg rounded-pill ms-2" @click="goToGames">✖ Fechar</button>
+      <button class="btn btn-light btn-lg rounded-pill ms-2" @click="goToGames">✖ {{ t('common.buttons.close') }}</button>
     </div>
 
     <div v-if="finished" class="win-overlay">
       <div class="win-card">
-        <h1 class="display-6 fw-bold text-center mb-3">🎉 Parabéns!</h1>
+        <h1 class="display-6 fw-bold text-center mb-3">🎉 {{ t('common.messages.congrats') }}</h1>
         <img src="/images/global/coco-aplaudiendo.webp" alt="Coco aplaudindo" class="img-coco-aplaudiendo" />
-        <p class="mb-3">Completaste as 3 rondas.</p>
+        <p class="mb-3">{{ t('common.messages.roundsComplete') }}</p>
         <div class="d-flex gap-2 justify-content-center mt-2">
-          <button class="btn-mais-uma" @click="resetGame">🎈 Mais uma!</button>
-          <button class="btn-salir" @click="goToGames">✖ Fechar</button>
+          <button class="btn-mais-uma" @click="resetGame">🎈 {{ t('common.buttons.playAgain') }}</button>
+          <button class="btn-salir" @click="goToGames">✖ {{ t('common.buttons.close') }}</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { speechVoices } from '@/lang'
 
 const ROUND_SIZE = 3 // 3 cartas por ronda
 const MAX_ROUNDS = 3 // 3 rondas
@@ -68,6 +70,8 @@ let errorSound
 let successSound
 const audioUnlocked = ref(false)
 const router = useRouter()
+const { t, locale } = useI18n()
+const voice = computed(() => speechVoices[locale.value] ?? speechVoices.es)
 
 // Paleta fuerte-suave para borde y número (tipo material escolar)
 const palette = [
@@ -168,12 +172,12 @@ watch(
   () => cards.value.filter(c => !c.flipped).length,
   (remaining) => {
     if (remaining === 0 && !finished.value) {
-      speakPt('Boa!')
+      speakText(t('common.messages.good'))
       setTimeout(() => {
         if (roundIndex.value >= MAX_ROUNDS) {
           finished.value = true
           try { successSound && successSound.play() } catch {}
-          speakPt('Muito bem!')
+          speakText(t('common.messages.greatJob'))
         } else {
           roundIndex.value++
           startRound()
@@ -212,7 +216,8 @@ function pickNextTarget() {
 
 function askForTarget() {
   if (finished.value) return
-  speakPt(`Onde está o número ${targetNumber.value}?`)
+  const text = t('games.numbersCards.speakPrompt', { number: targetNumber.value })
+  speakText(text)
 }
 
 function repeatQuestion() {
@@ -220,12 +225,12 @@ function repeatQuestion() {
   askForTarget()
 }
 
-function speakPt(text) {
+function speakText(text) {
   try {
     if (!import.meta.client) return
     if (!audioUnlocked.value && speechSynthesis.speaking) speechSynthesis.cancel()
     const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'pt-PT'
+    u.lang = voice.value
     // Pequeño retraso mejora fiabilidad tras montado
     setTimeout(() => {
       try { speechSynthesis.cancel() } catch {}

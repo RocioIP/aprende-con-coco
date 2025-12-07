@@ -29,28 +29,32 @@
     <!-- Pantalla de victoria -->
     <div v-else class="win-overlay">
       <div class="win-card">
-        <h1 class="display-6 fw-bold text-center mb-3">ðŸŽ‰ ParabÃ©ns!</h1>
+                <h1 class="display-6 fw-bold text-center mb-3">🎉 {{ t('common.messages.congrats') }}</h1>
         <img
           src="/images/global/coco-aplaudiendo.webp"
           alt="Coco aplaudindo"
           class="img-coco-aplaudiendo"
         />
         <div class="d-flex gap-2 justify-content-center mt-4">
-          <button class="btn-mais-uma" @click="resetGame">ðŸŽˆ Mais uma!</button>
-          <button class="btn-salir" @click="goToGames">âœ– Fechar</button>
+                    <button class="btn-mais-uma" @click="resetGame">🎈 {{ t('common.buttons.playAgain') }}</button>
+                    <button class="btn-salir" @click="goToGames">✖ {{ t('common.buttons.close') }}</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import confetti from 'canvas-confetti'
 import Bell from '@/components/atoms/Bell.vue'
+import { useI18n } from 'vue-i18n'
+import { speechVoices } from '@/lang'
 
 const router = useRouter()
+const { t, locale } = useI18n()
+const voice = computed(() => speechVoices[locale.value] ?? speechVoices.es)
 
 const QUESTIONS_PER_ROUND = 5
 const OPTIONS_PER_QUESTION = 2
@@ -65,7 +69,9 @@ const isLocked = ref(false)
 const hasWon = ref(false)
 
 const currentLetter = computed(() => questions.value[index.value])
-const promptText = computed(() => `Esta é a letra ${currentLetter.value.letter}. A qual é que se assemelha?`)
+const promptText = computed(() =>
+  t('games.letters.prompt', { letter: currentLetter.value.letter })
+)
 
 let audioCorrect = null
 let audioWrong = null
@@ -191,7 +197,7 @@ function playSound(type) {
 
 function speak(text, cb) {
   const utterance = new SpeechSynthesisUtterance(text)
-  utterance.lang = 'pt-PT'
+  utterance.lang = voice.value
   if (cb) utterance.onend = cb
   speechSynthesis.cancel()
   speechSynthesis.speak(utterance)
@@ -199,8 +205,8 @@ function speak(text, cb) {
 
 function speakPrompt() {
   const letter = currentLetter.value.letter
-  const first = `Esta é a letra ${letter}`
-  const second = 'A qual é que se assemelha?'
+  const first = t('games.letters.speakFirst', { letter })
+  const second = t('games.letters.speakSecond')
   speak(first, () => setTimeout(() => speak(second), QUESTION_PAUSE_MS))
 }
 
@@ -290,3 +296,4 @@ function sampleUnique(pool, n) {
 }
 .btn-salir:hover { background: #dee2e6; transform: translateY(-1px); }
 </style>
+

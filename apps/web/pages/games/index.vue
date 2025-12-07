@@ -1,30 +1,26 @@
 <template>
   <div class="container py-5 text-center">
-    <h2 class="display-5 mb-4 text-primary fw-bold">Escolha um jogo</h2>
+    <h2 class="display-5 mb-4 text-primary fw-bold">{{ t('games.index.title') }}</h2>
 
     <div class="row justify-content-center g-4">
-      <!-- Tarjeta: Colores -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/balloons" class="card juego-card">
           <img src="/images/games/balloons.webp" alt="Juego de globos" class="card-img-top" />
         </NuxtLink>
       </div>
 
-      <!-- Tarjeta: Letras -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/letters" class="card juego-card">
           <img src="/images/games/letters.webp" alt="Juego de letras" class="card-img-top" />
         </NuxtLink>
       </div>
 
-      <!-- Tarjeta: Números -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/animalsound" class="card juego-card">
           <img src="/images/games/friends.webp" alt="Juego de amigos" class="card-img-top" />
         </NuxtLink>
       </div>
 
-      <!-- Tarjeta: Números (Cartas) -->
       <div class="col-6 col-md-4 col-lg-3">
         <NuxtLink to="/games/numbers-cards" class="card juego-card">
           <img src="/images/games/numbers.webp" alt="Juego de números" class="card-img-top" />
@@ -34,13 +30,18 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { speechVoices } from '@/lang'
+
+const { t, locale } = useI18n()
+const titleText = computed(() => t('games.index.title'))
+const voice = computed(() => speechVoices[locale.value] ?? speechVoices.es)
 
 onMounted(() => {
-  const text = "Escolha um jogo"
-  const utterance = new SpeechSynthesisUtterance(text)
-  utterance.lang = "pt-PT" // O usa "pt-BR" si prefieres brasileño
+  const utterance = new SpeechSynthesisUtterance(titleText.value)
+  utterance.lang = voice.value
   speechSynthesis.cancel()
   speechSynthesis.speak(utterance)
 })

@@ -1,6 +1,7 @@
 export default defineNuxtConfig({
   css: [
     'bootstrap/dist/css/bootstrap.min.css',
+    'flag-icons/css/flag-icons.min.css',
     '@/assets/css/custom.css'
   ],
   modules: ['@nuxtjs/google-fonts'],

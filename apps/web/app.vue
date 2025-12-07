@@ -9,7 +9,6 @@
 import { onMounted } from 'vue';
 import AppHeader from './components/organisms/AppHeader.vue'
 onMounted(async () => {
-  console.log("🔥 Bootstrap cargado desde App.vue");
   await import('bootstrap/dist/js/bootstrap.bundle.min.js');
 })
 
