@@ -5,48 +5,32 @@
         <img src="/public/images/global/logo.webp" alt="Logo aprende con Coco" class="img-logo">
       </NuxtLink>
 
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
-        aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div
-        class="collapse navbar-collapse justify-content-end align-items-center gap-3"
-        id="navbarContent"
-      >
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/games">{{ t('common.nav.games') }}</NuxtLink>
-          </li>
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/stories">{{ t('common.nav.stories') }}</NuxtLink>
-          </li>
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/blackboard">{{ t('common.nav.blackboard') }}</NuxtLink>
-          </li>
-        </ul>
-
+      <div class="mobile-controls d-lg-none">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="language-dropdown" ref="dropdownRef">
-          <button
-            type="button"
-            class="lang-toggle"
-            @click.stop="toggleDropdown"
-          >
-            <span
-              class="flag"
-              :class="['fi', currentLanguage.flagClass]"
-              aria-hidden="true"
-            ></span>
-            <span class="sr-only">{{ currentLanguage.label }}</span>
-            <span class="caret" aria-hidden="true">▼</span>
-          </button>
+        <button
+          type="button"
+          class="lang-toggle"
+          @click.stop="toggleDropdown"
+          aria-label="Cambiar idioma"
+        >
+          <span
+            class="flag"
+            :class="['fi', currentLanguage.flagClass]"
+            aria-hidden="true"
+          ></span>
+          <span class="sr-only">{{ currentLanguage.label }}</span>
+        </button>
           <ul v-if="isDropdownOpen" class="lang-menu">
             <li v-for="lang in languages" :key="lang.code">
               <button
@@ -65,6 +49,58 @@
               </button>
             </li>
           </ul>
+        </div>
+      </div>
+
+      <div
+        class="collapse navbar-collapse justify-content-end align-items-center gap-3"
+        id="navbarContent"
+      >
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <NuxtLink class="nav-link" to="/games">{{ t('common.nav.games') }}</NuxtLink>
+          </li>
+          <li class="nav-item">
+            <NuxtLink class="nav-link" to="/stories">{{ t('common.nav.stories') }}</NuxtLink>
+          </li>
+          <li class="nav-item">
+            <NuxtLink class="nav-link" to="/blackboard">{{ t('common.nav.blackboard') }}</NuxtLink>
+          </li>
+        </ul>
+        <div class="language-dropdown d-none d-lg-block">
+          <div class="d-flex align-items-center">
+            <button
+              type="button"
+              class="lang-toggle"
+              @click.stop="toggleDropdown"
+              aria-label="Cambiar idioma"
+            >
+              <span
+                class="flag"
+                :class="['fi', currentLanguage.flagClass]"
+                aria-hidden="true"
+              ></span>
+              <span class="sr-only">{{ currentLanguage.label }}</span>
+            </button>
+            <ul v-if="isDropdownOpen" class="lang-menu">
+              <li v-for="lang in languages" :key="lang.code">
+                <button
+                  type="button"
+                  class="lang-option"
+                  :class="{ active: currentLocale === lang.code }"
+                  :title="lang.label"
+                  @click.stop="selectLocale(lang.code)"
+                >
+                  <span
+                    class="flag"
+                    :class="['fi', lang.flagClass]"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="sr-only">{{ lang.label }}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
@@ -140,29 +176,28 @@ onBeforeUnmount(() => {
   height: 6rem;
 }
 
+.mobile-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .language-dropdown {
   position: relative;
 }
 
 .lang-toggle {
-  border: 1px solid #0d6efd;
-  background: #fff;
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-  font-weight: 600;
-  color: #0d6efd;
+  border: none;
+  background: transparent;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
   cursor: pointer;
 }
 
 .flag {
-  --fi-size: 1.4rem;
-}
-
-.caret {
-  font-size: 0.8rem;
+  --fi-size: 1.7rem;
 }
 
 .lang-menu {
