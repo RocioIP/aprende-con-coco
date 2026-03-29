@@ -1,11 +1,33 @@
 <template>
   <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-0">
-      <NuxtLink class="navbar-brand" to="/">
-        <img src="/public/images/global/logo.webp" alt="Logo aprende con Coco" class="img-logo">
+      <NuxtLink class="navbar-brand" to="/" :aria-label="t('common.accessibility.home')">
+        <img src="/images/global/logo.webp" alt="Logo aprende con Coco" class="img-logo" />
       </NuxtLink>
 
+      <div class="header-access d-none d-lg-flex">
+        <ChildAccountMenu v-if="showAccountMenu" />
+        <NuxtLink
+          v-else-if="showLoginButton"
+          :to="APP_ROUTES.login"
+          class="header-login"
+        >
+          {{ t('common.nav.login') }}
+        </NuxtLink>
+      </div>
+
       <div class="mobile-controls d-lg-none">
+        <ChildAccountMenu
+          v-if="showAccountMenu"
+          class="mobile-account-trigger"
+        />
+        <NuxtLink
+          v-else-if="showLoginButton"
+          :to="APP_ROUTES.login"
+          class="header-login header-login--mobile"
+        >
+          {{ t('common.nav.login') }}
+        </NuxtLink>
         <button
           class="navbar-toggler"
           type="button"
@@ -17,90 +39,18 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="language-dropdown" ref="dropdownRef">
-        <button
-          type="button"
-          class="lang-toggle"
-          @click.stop="toggleDropdown"
-          aria-label="Cambiar idioma"
-        >
-          <span
-            class="flag"
-            :class="['fi', currentLanguage.flagClass]"
-            aria-hidden="true"
-          ></span>
-          <span class="sr-only">{{ currentLanguage.label }}</span>
-        </button>
-          <ul v-if="isDropdownOpen" class="lang-menu">
-            <li v-for="lang in languages" :key="lang.code">
-              <button
-                type="button"
-                class="lang-option"
-                :class="{ active: currentLocale === lang.code }"
-                :title="lang.label"
-                @click.stop="selectLocale(lang.code)"
-              >
-                <span
-                  class="flag"
-                  :class="['fi', lang.flagClass]"
-                  aria-hidden="true"
-                ></span>
-                <span class="sr-only">{{ lang.label }}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
       </div>
 
       <div
         class="collapse navbar-collapse justify-content-end align-items-center gap-3"
         id="navbarContent"
       >
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/games">{{ t('common.nav.games') }}</NuxtLink>
-          </li>
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/stories">{{ t('common.nav.stories') }}</NuxtLink>
-          </li>
-          <li class="nav-item">
-            <NuxtLink class="nav-link" to="/blackboard">{{ t('common.nav.blackboard') }}</NuxtLink>
-          </li>
-        </ul>
-        <div class="language-dropdown d-none d-lg-block">
-          <div class="d-flex align-items-center">
-            <button
-              type="button"
-              class="lang-toggle"
-              @click.stop="toggleDropdown"
-              aria-label="Cambiar idioma"
-            >
-              <span
-                class="flag"
-                :class="['fi', currentLanguage.flagClass]"
-                aria-hidden="true"
-              ></span>
-              <span class="sr-only">{{ currentLanguage.label }}</span>
-            </button>
-            <ul v-if="isDropdownOpen" class="lang-menu">
-              <li v-for="lang in languages" :key="lang.code">
-                <button
-                  type="button"
-                  class="lang-option"
-                  :class="{ active: currentLocale === lang.code }"
-                  :title="lang.label"
-                  @click.stop="selectLocale(lang.code)"
-                >
-                  <span
-                    class="flag"
-                    :class="['fi', lang.flagClass]"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="sr-only">{{ lang.label }}</span>
-                </button>
-              </li>
-            </ul>
-          </div>
+        <template v-if="showNavigationLinks">
+          <AppNavLinks />
+        </template>
+
+        <div class="header-locale">
+          <LocaleSwitcher />
         </div>
       </div>
     </nav>
@@ -108,72 +58,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { APP_ROUTES } from '@/constants/routes'
+import { useAuthSession } from '@/composables/useAuthSession'
+import AppNavLinks from '@/components/molecules/AppNavLinks.vue'
+import ChildAccountMenu from '@/components/molecules/ChildAccountMenu.vue'
+import LocaleSwitcher from '@/components/molecules/LocaleSwitcher.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const route = useRoute()
+const auth = useAuthSession()
 
-const languages = [
-  { code: 'es', label: 'Español', flagClass: 'fi-es' },
-  { code: 'pt', label: 'Português', flagClass: 'fi-pt' },
-] as const
+const isAuthRoute = computed(() => [APP_ROUTES.login, APP_ROUTES.register].includes(route.path))
 
-const currentLocale = computed({
-  get: () => locale.value,
-  set: (value: typeof languages[number]['code']) => {
-    locale.value = value
-  },
-})
-
-const currentLanguage = computed(
-  () => languages.find((lang) => lang.code === currentLocale.value) ?? languages[0]
-)
-
-const isDropdownOpen = ref(false)
-const dropdownRef = ref<HTMLElement | null>(null)
-
-function toggleDropdown() {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
-
-function closeDropdown() {
-  isDropdownOpen.value = false
-}
-
-function selectLocale(code: typeof languages[number]['code']) {
-  if (currentLocale.value === code) return
-  currentLocale.value = code
-  closeDropdown()
-}
-
-function handleClickOutside(event: MouseEvent) {
-  if (!dropdownRef.value) return
-  if (!dropdownRef.value.contains(event.target as Node)) {
-    closeDropdown()
-  }
-}
+const showNavigationLinks = computed(() => !isAuthRoute.value)
+const showLoginButton = computed(() => !auth.isAuthenticated.value && !isAuthRoute.value)
+const showAccountMenu = computed(() => auth.isAuthenticated.value && !isAuthRoute.value)
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
+  void auth.ensureSession()
 })
 </script>
 
 <style scoped>
-.nav-link {
-  font-weight: 500;
-  font-size: 1.5rem;
-}
-.nav-link:hover {
-  color: #0d6efd !important;
-}
-
 .img-logo {
   width: 6rem;
   height: 6rem;
+}
+
+.navbar {
+  position: relative;
 }
 
 .mobile-controls {
@@ -183,66 +98,72 @@ onBeforeUnmount(() => {
   margin-left: auto;
 }
 
-.language-dropdown {
-  position: relative;
+.header-access {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 
-.lang-toggle {
-  border: none;
-  background: transparent;
-  padding: 0;
+.header-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.15rem;
+  border-radius: 999px;
+  background: #edf3ff;
+  color: #2559c8;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.header-login:hover,
+.header-login:focus-visible {
+  background: #dfeaff;
+  color: #1844a5;
+}
+
+.header-login:focus-visible {
+  outline: 3px solid rgba(13, 110, 253, 0.24);
+  outline-offset: 3px;
+}
+
+.header-login--mobile {
+  padding: 0.42rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+.mobile-account-trigger {
+  flex: 0 1 auto;
+}
+
+.header-locale {
   display: flex;
   align-items: center;
-  cursor: pointer;
 }
 
-.flag {
-  --fi-size: 1.7rem;
+@media (max-width: 991px) {
+  .navbar-collapse {
+    padding: 0.75rem 0 1rem;
+  }
+
+  .header-access {
+    position: static;
+    transform: none;
+  }
+
+  .header-locale {
+    justify-content: flex-start;
+    width: 100%;
+    padding-top: 0.35rem;
+  }
 }
 
-.lang-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.25rem);
-  background: #fff;
-  border: 1px solid #d1d7e0;
-  border-radius: 12px;
-  padding: 0.25rem;
-  list-style: none;
-  margin: 0;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  min-width: 70px;
-  z-index: 10;
-}
-
-.lang-option {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 0.4rem 0.6rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #0b132b;
-  transition: background 0.2s ease;
-}
-
-.lang-option:hover,
-.lang-option.active {
-  background: rgba(13, 110, 253, 0.1);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+@media (prefers-reduced-motion: reduce) {
+  .header-login {
+    transition: none;
+  }
 }
 </style>

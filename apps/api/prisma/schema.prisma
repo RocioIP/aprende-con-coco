@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -7,58 +8,292 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum UserRole {
   parent
   therapist
   admin
 }
 
-enum Size {
-  grande
-  pequeno
+enum ChildCaregiverRole {
+  parent
+  therapist
+  guardian
+  teacher
+}
+
+enum AccessLevel {
+  owner
+  editor
+  viewer
+}
+
+enum ActivityType {
+  game
+  story
+  blackboard
+}
+
+enum ActivityStatus {
+  draft
+  active
+  archived
+}
+
+enum SkillCategory {
+  literacy
+  numeracy
+  attention
+  auditory
+  visual
+  motor
+  language
+}
+
+enum SessionStatus {
+  started
+  completed
+  abandoned
+  interrupted
+}
+
+enum ChildGender {
+  boy
+  girl
+}
+
+enum RecommendationKind {
+  next_activity
+  difficulty_adjustment
+  caregiver_tip
+  schedule_tip
+  engagement_support
+}
+
+enum RecommendationStatus {
+  active
+  accepted
+  dismissed
+  expired
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  passwordHash  String
-  role          Role      @default(parent)
-  createdAt     DateTime  @default(now())
-  children      Child[]
+  id           Int              @id @default(autoincrement())
+  email        String           @unique
+  passwordHash String
+  displayName  String?
+  role         UserRole         @default(parent)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  childLinks   ChildCaregiver[]
 }
 
 model Child {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  name       String
-  birthdate  DateTime?
-  settings   Json?
-  createdAt  DateTime  @default(now())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attempts   Attempt[]
+  id                 Int                    @id @default(autoincrement())
+  name               String
+  loginName          String                 @unique
+  gender             ChildGender
+  birthdate          DateTime?
+  passwordHash       String
+  adminPasswordHash  String
+  profile            Json?
+  settings           Json?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  caregivers         ChildCaregiver[]
+  sessions           ActivitySession[]
+  skillSnapshots     ChildSkillSnapshot[]
+  dailyActivityStats ChildActivityDailyStat[]
+  recommendations    Recommendation[]
+}
 
+model ChildCaregiver {
+  id           Int                @id @default(autoincrement())
+  childId      Int
+  userId       Int
+  relationship ChildCaregiverRole @default(parent)
+  accessLevel  AccessLevel        @default(editor)
+  isPrimary    Boolean            @default(false)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  child        Child              @relation(fields: [childId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, userId])
+  @@index([childId])
   @@index([userId])
 }
 
-model Game {
-  id    Int     @id @default(autoincrement())
-  code  String  @unique   // p.ej. "color_balloons"
-  name  String
+model Activity {
+  id              Int                    @id @default(autoincrement())
+  code            String                 @unique
+  name            String
+  description     String?
+  type            ActivityType
+  status          ActivityStatus         @default(active)
+  config          Json?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  skills          ActivitySkill[]
+  sessions        ActivitySession[]
+  dailyStats      ChildActivityDailyStat[]
+  recommendations Recommendation[]
 }
 
-model Attempt {
-  id           Int       @id @default(autoincrement())
-  childId      Int
-  gameCode     String
-  level        Int
-  targetColor  String?
-  targetSize   Size?
-  targetLetter String?
-  result       Boolean
-  reactionMs   Int?
-  createdAt    DateTime  @default(now())
+model Skill {
+  id          Int                  @id @default(autoincrement())
+  code        String               @unique
+  name        String
+  category    SkillCategory
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  activities  ActivitySkill[]
+  snapshots   ChildSkillSnapshot[]
+}
 
-  child        Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+model ActivitySkill {
+  id         Int      @id @default(autoincrement())
+  activityId Int
+  skillId    Int
+  weight     Float    @default(1)
+  createdAt  DateTime @default(now())
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
-  @@index([childId, gameCode, level])
+  @@unique([activityId, skillId])
+  @@index([skillId])
+}
+
+model ActivitySession {
+  id               Int               @id @default(autoincrement())
+  childId          Int
+  activityId       Int
+  locale           String            @default("es") @db.VarChar(10)
+  status           SessionStatus     @default(started)
+  startedAt        DateTime          @default(now())
+  endedAt          DateTime?
+  durationMs       Int?
+  difficultyStart  Int?
+  difficultyEnd    Int?
+  completionRate   Float?
+  score            Float?
+  totalResponses   Int               @default(0)
+  correctResponses Int               @default(0)
+  wrongResponses   Int               @default(0)
+  helpCount        Int               @default(0)
+  audioReplayCount Int               @default(0)
+  deviceType       String?           @db.VarChar(50)
+  metadata         Json?
+  child            Child             @relation(fields: [childId], references: [id], onDelete: Cascade)
+  activity         Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  responses        ActivityResponse[]
+  events           InteractionEvent[]
+
+  @@index([childId, startedAt])
+  @@index([activityId, startedAt])
+  @@index([status, startedAt])
+}
+
+model ActivityResponse {
+  id               Int                @id @default(autoincrement())
+  sessionId        Int
+  sequence         Int
+  promptType       String?            @db.VarChar(80)
+  prompt           Json?
+  expected         Json?
+  answer           Json?
+  isCorrect        Boolean
+  reactionMs       Int?
+  attemptNumber    Int                @default(1)
+  helpUsed         Boolean            @default(false)
+  hintsUsed        Int                @default(0)
+  audioReplayCount Int                @default(0)
+  metadata         Json?
+  createdAt        DateTime           @default(now())
+  session          ActivitySession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  events           InteractionEvent[]
+
+  @@unique([sessionId, sequence])
+  @@index([sessionId, isCorrect])
+}
+
+model InteractionEvent {
+  id         Int               @id @default(autoincrement())
+  sessionId  Int
+  responseId Int?
+  type       String            @db.VarChar(80)
+  occurredAt DateTime          @default(now())
+  payload    Json?
+  session    ActivitySession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  response   ActivityResponse? @relation(fields: [responseId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, occurredAt])
+  @@index([responseId])
+  @@index([type])
+}
+
+model ChildSkillSnapshot {
+  id              Int      @id @default(autoincrement())
+  childId         Int
+  skillId         Int
+  snapshotDate    DateTime @db.Date
+  attemptsCount   Int      @default(0)
+  correctCount    Int      @default(0)
+  accuracyRate    Float?
+  avgReactionMs   Int?
+  confidenceScore Float?
+  masteryScore    Float?
+  notes           Json?
+  createdAt       DateTime @default(now())
+  child           Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  skill           Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, skillId, snapshotDate])
+  @@index([childId, snapshotDate])
+}
+
+model ChildActivityDailyStat {
+  id                Int      @id @default(autoincrement())
+  childId           Int
+  activityId        Int
+  statDate          DateTime @db.Date
+  sessionsCount     Int      @default(0)
+  completedSessions Int      @default(0)
+  abandonedSessions Int      @default(0)
+  totalResponses    Int      @default(0)
+  correctResponses  Int      @default(0)
+  wrongResponses    Int      @default(0)
+  totalHelpUsed     Int      @default(0)
+  totalAudioReplays Int      @default(0)
+  avgReactionMs     Int?
+  engagementScore   Float?
+  preferenceScore   Float?
+  createdAt         DateTime @default(now())
+  child             Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  activity          Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, activityId, statDate])
+  @@index([childId, statDate])
+}
+
+model Recommendation {
+  id              Int                  @id @default(autoincrement())
+  childId         Int
+  activityId      Int?
+  kind            RecommendationKind
+  status          RecommendationStatus @default(active)
+  priority        Int                  @default(50)
+  title           String
+  summary         String
+  rationale       Json?
+  suggestedConfig Json?
+  source          String               @default("rules")
+  validFrom       DateTime             @default(now())
+  validTo         DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  child           Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
+  activity        Activity?            @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  @@index([childId, status, priority])
 }

@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  buildDir: '../../node_modules/.cache/nuxt/apps-web/.nuxt',
   css: [
     'bootstrap/dist/css/bootstrap.min.css',
     'flag-icons/css/flag-icons.min.css',
@@ -13,7 +14,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8081'
     }
   },
 
