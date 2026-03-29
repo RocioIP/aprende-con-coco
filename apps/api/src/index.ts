@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
-import cors, { type CorsOptionsDelegate } from 'cors'
+import cors, { type CorsOptions, type CorsOptionsDelegate } from 'cors'
 import express, { Request, Response } from 'express'
 import helmet from 'helmet'
 import {
@@ -344,12 +344,12 @@ const corsOrigin: CorsOptionsDelegate<Request> = (origin, cb) => {
   return cb(new Error('Not allowed by CORS'))
 }
 
-app.use(
-  cors({
-    origin: corsOrigin,
-    credentials: true,
-  })
-)
+const corsOptions: CorsOptions = {
+  origin: corsOrigin,
+  credentials: true,
+}
+
+app.use(cors(corsOptions))
 
 function parseNumericParam(value: string, paramName: string) {
   const parsed = Number(value)
