@@ -40,7 +40,7 @@ import { useAuthSession } from '@/composables/useAuthSession'
 import AdminUnlockDialog from '@/components/molecules/AdminUnlockDialog.vue'
 
 const { t } = useI18n()
-const { adminUnlocked, child, isLoading, logout, unlockAdmin } = useAuthSession()
+const { adminUnlocked, child, errorMessage, isLoading, logout, unlockAdmin } = useAuthSession()
 
 const isOpen = ref(false)
 const isDialogOpen = ref(false)
@@ -67,7 +67,9 @@ async function submitUnlock(password: string) {
       await navigateTo(nextRoute)
     }
   } catch {
-    unlockErrorMessage.value = t('auth.errors.invalid_admin_password')
+    unlockErrorMessage.value = errorMessage.value
+      ? t(`auth.errors.${errorMessage.value}`)
+      : t('auth.errors.invalid_admin_password')
   }
 }
 

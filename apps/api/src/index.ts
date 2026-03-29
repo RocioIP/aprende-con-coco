@@ -220,10 +220,13 @@ function readAuthSession(req: Request): AuthSessionPayload | null {
 }
 
 function serializeCookie(name: string, value: string, options?: { maxAge?: number; expires?: Date }) {
-  const segments = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', 'SameSite=Lax']
+  const segments = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly']
 
   if (process.env.NODE_ENV === 'production') {
+    segments.push('SameSite=None')
     segments.push('Secure')
+  } else {
+    segments.push('SameSite=Lax')
   }
 
   if (options?.maxAge !== undefined) {
