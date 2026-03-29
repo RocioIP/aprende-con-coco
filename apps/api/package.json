@@ -8,8 +8,10 @@
     "start": "node dist/index.js",
     "prisma:dev": "prisma migrate dev",
     "prisma:gen": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:push": "prisma db push",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed:catalog": "tsx prisma/seed-catalog.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",
