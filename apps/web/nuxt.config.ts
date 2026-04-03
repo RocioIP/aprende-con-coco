@@ -13,8 +13,9 @@ export default defineNuxtConfig({
     display: 'swap'
   },
   runtimeConfig: {
+    apiProxyTarget: process.env.API_PROXY_TARGET || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8081',
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8081'
+      apiBase: '/api'
     }
   },
 
